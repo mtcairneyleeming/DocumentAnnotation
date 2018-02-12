@@ -1,0 +1,40 @@
+@page
+@model server.Pages.Annotations.DeleteModel
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Annotation</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Annotation.Title)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Annotation.Title)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Annotation.Body)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Annotation.Body)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Annotation.TextId)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Annotation.TextId)
+        </dd>
+    </dl>
+    
+    <form method="post">
+        <input type="hidden" asp-for="Annotation.AnnotationId" />
+        <input type="submit" value="Delete" class="btn btn-default" /> |
+        <a asp-page="./Index">Back to List</a>
+    </form>
+</div>
