@@ -1,0 +1,23 @@
+{
+  "DBId": 0,
+  "Name": "Title",
+  "Books": [
+    {
+      "Name": "Book I",
+      "Sections": [
+        {
+          "Name": "Section 1",
+          "Groups": [
+            {
+              "Name": "Group 1",
+              "Data": "lorem ipsum dolor sit amet...",
+              "AddNewLine": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
