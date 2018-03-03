@@ -18,7 +18,7 @@ namespace server.Pages.Texts
             _context = context;
         }
 
-        public IList<Text> Text { get;set; }
+        public IList<TextData> Text { get;set; }
 
         public async Task OnGetAsync()
         {
