@@ -8,18 +8,27 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using server.Models;
+using server.TextLoader;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace server
 {
+    public class Config
+    {
+        public string ProcessedTexts { get; set; }
+    }
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IConfigurationRoot Configuration { get; set; }
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+            Configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -38,6 +47,8 @@ namespace server
                     TermsOfService = "None"
                 });
             });
+            services.Configure<Config>(Configuration.GetSection("Config"));
+            services.AddSingleton<TextsLoader>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
