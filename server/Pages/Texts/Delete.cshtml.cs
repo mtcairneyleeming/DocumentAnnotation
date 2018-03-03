@@ -19,7 +19,7 @@ namespace server.Pages.Texts
         }
 
         [BindProperty]
-        public Text Text { get; set; }
+        public TextData Text { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {

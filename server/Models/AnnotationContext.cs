@@ -7,7 +7,7 @@ namespace server.Models
     {
         public DbSet<Annotation> Annotations { get; set; }
         public DbSet<Highlight> Highlights { get; set; }
-        public DbSet<Text> Texts { get; set; }
+        public DbSet<TextData> Texts { get; set; }
         public DbSet<DocumentAnnotation> DocumentAnnotations { get; set; }
 
         public AnnotationContext()
