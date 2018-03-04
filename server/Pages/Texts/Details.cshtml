@@ -24,6 +24,7 @@
             @Html.DisplayFor(model => model.Text.Abbreviation)
         </dd>
     </dl>
+    @Html.DisplayTextFor(model => model.ActualText.Books[0].Sections[0].Groups[0].Data)
 </div>
 <div>
     <a asp-page="./Edit" asp-route-id="@Model.Text.TextId">Edit</a> |
