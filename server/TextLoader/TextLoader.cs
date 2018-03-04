@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -12,21 +13,23 @@ namespace server.TextLoader
     /// <summary>
     /// Load texts, e.g. the Pro Milone from local xml files, as stored by Perseus. This keeps a cache of files, and is used as a singleton.
     /// </summary>
-    public class TextsLoader
+    public class TextLoader
     {
         private List<Text> _texts = new List<Text>();
-        private readonly IOptions<Config> config;
+        private readonly IOptions<Config> _config;
 
-        public TextsLoader(IOptions<Config> config)
+        public TextLoader(IOptions<Config> config)
         {
-            this.config = config;
+            this._config = config;
         }
         
         
-        Text LoadText(string textIdentifier)
+        public Text LoadText(string textIdentifier)
         {
-            using (var originalFile = File.OpenRead($"{config.Value.ProcessedTexts}/{textIdentifier}/.json.gz"))
+            Debug.WriteLine($"Beginning to load text {textIdentifier}");
+            using (var originalFile = File.OpenRead($"{_config.Value.ProcessedTexts}/{textIdentifier}.json.gz"))
             {
+                Debug.WriteLine($"Opened compressed file for text {textIdentifier}");
                 using (GZipStream decompressionStream = new GZipStream(originalFile, CompressionMode.Decompress))
                 {
                     var text = DeserializeFromStream(decompressionStream);
@@ -34,12 +37,13 @@ namespace server.TextLoader
                     {
                         _texts.Add(text);
                     }
+                    Debug.WriteLine($"Loaded text {textIdentifier}");
                     return text;
 
                 }
             }
         }
-        public static Text DeserializeFromStream(Stream stream)
+        private static Text DeserializeFromStream(Stream stream)
         {
             var serializer = new JsonSerializer();
 
