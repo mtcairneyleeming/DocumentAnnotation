@@ -11,9 +11,10 @@ using System;
 namespace server.Migrations
 {
     [DbContext(typeof(AnnotationContext))]
-    partial class AnnotationContextModelSnapshot : ModelSnapshot
+    [Migration("20180303160332_MinorTextChanges")]
+    partial class MinorTextChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
