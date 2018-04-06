@@ -15,9 +15,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--input-directory", "-i", type=str, required=True, dest="input")
 parser.add_argument("--output-directory", "-o", type=str, required=True, dest="output")
 parser.add_argument("--identifier", "-f", type=str, required=False)
-parser.add_argument("--add-new-line", "-n", required=False, dest="newLine")
+parser.add_argument("--add-new-line", "-n", required=False, dest="newLine", default=False)
 
 args = parser.parse_args()
+
 if args.identifier:
     tr = Transformer(args.input, args.output, args.identifier, args.newLine)
     tr.build_output()
@@ -25,6 +26,7 @@ else:
     # do all files in directory of form x.y.z.xml (not ...metadata.xml)
     files = glob.glob(args.input + "/*.xml")
     for file in files:
+        print(file)
         if file.endswith("metadata.xml"):
             pass
         else:

@@ -5,13 +5,16 @@ namespace server.Models
 {
     public class Location : IComparable<Location>, IComparable
     {
-        public Location(int locationId, int bookNumber, int sectionNumber, int groupNumber, int character)
+        public Location(int bookNumber, int sectionNumber, int groupNumber, int character)
         {
-            LocationId = locationId;
             BookNumber = bookNumber;
             SectionNumber = sectionNumber;
             GroupNumber = groupNumber;
             Character = character;
+        }
+
+        public Location()
+        {
         }
 
         public int CompareTo(Location other)
@@ -55,10 +58,6 @@ namespace server.Models
             return Comparer<Location>.Default.Compare(left, right) >= 0;
         }
 
-        /// <summary>
-        /// UID Key for a location
-        /// </summary>
-        public int LocationId { get; set; }
         public int BookNumber {get;set;}
         public int SectionNumber {get;set;}
         public int GroupNumber { get; set; }

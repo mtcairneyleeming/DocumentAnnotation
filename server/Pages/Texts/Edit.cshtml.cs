@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using server.Models;
 
@@ -12,9 +9,9 @@ namespace server.Pages.Texts
 {
     public class EditModel : PageModel
     {
-        private readonly server.Models.AnnotationContext _context;
+        private readonly AnnotationContext _context;
 
-        public EditModel(server.Models.AnnotationContext context)
+        public EditModel(AnnotationContext context)
         {
             _context = context;
         }
@@ -57,10 +54,8 @@ namespace server.Pages.Texts
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return RedirectToPage("./Index");

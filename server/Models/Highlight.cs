@@ -4,6 +4,10 @@ namespace server.Models
 {
     public class Highlight
     {
+        public Highlight()
+        {
+        }
+
         public Highlight(Location start, Location end)
         {
             if (start > end)

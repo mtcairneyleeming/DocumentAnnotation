@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace server.Models
 {
@@ -10,7 +11,17 @@ namespace server.Models
         public int DocumentAnnotationId { get; set; }
         
         public int TextId { get; set; }
-        public string UserId { get; set; } // currently unused
+        public TextData Text { get; set; }
+
+        
+        public string UserId { get; set; }
+        [ForeignKey("UserId")]
+        public AppUser User { get; set; }
+        
+        
+        public string Name { get; set; }
+        
         public List<Annotation> Annotations { get; set; }
-    }
+        
+        }
 }

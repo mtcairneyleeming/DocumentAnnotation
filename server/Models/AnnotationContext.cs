@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace server.Models
 {
-    public class AnnotationContext: DbContext
+    public class AnnotationContext: IdentityDbContext<AppUser>
     {
         public DbSet<Annotation> Annotations { get; set; }
         public DbSet<Highlight> Highlights { get; set; }
@@ -18,7 +18,7 @@ namespace server.Models
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Highlight>(entity =>
             {
                 entity.OwnsOne(h => h.Start);

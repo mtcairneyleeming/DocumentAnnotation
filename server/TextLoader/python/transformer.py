@@ -5,6 +5,13 @@ from typing import List
 from lxml import etree
 
 
+def int_try_parse(value):
+    try:
+        return int(value), True
+    except ValueError:
+        return value, False
+
+
 # noinspection PyArgumentList
 class Transformer:
     """Transforms TEI.2 xml documents from Perseus to a custom JSON format for simpler use with the C# server"""
@@ -67,35 +74,68 @@ class Transformer:
             text = " ".join(text.split())
             self.processed_groups.append({"Data": text, "AddNewLine": self.use_new_line})
 
+    def fix_names(self):
+        """Go through the books and sections, and if when parsed as integers, the names of sections do not
+        consecutively increase, set the names to the range """
+
+        for book in self.processed_books:
+
+            checks = []
+            for x in book["Sections"]:
+                print(x["Name"])
+                checks.append(int_try_parse(x["Name"]))
+            if all(check[1] for check in checks):
+                # all sections are integers
+                print("Yay!")
+
+                int_names = [check[0] for check in checks]
+                discontinuous_numbering = False
+                for i in range(len(int_names)):
+                    if i != len(int_names) - 1:
+
+                        if int_names[i] +1  != int_names[i+1]:
+                            # discontinuous naming
+                            book["Sections"][i]["Name"] = "{0}-{1}".format(int_names[i], int_names[i +1] - 1)
+                            discontinuous_numbering = True
+                    else:
+                        if discontinuous_numbering:
+                            # only add "-end" if the sections previous were not chapters like Pro Milone, but lines
+                            # like the Aeneid
+                            book["Sections"][i]["Name"] = "{0}-end".format(int_names[i])
+
+    def save_book(self, new_name):
+        if self.current_book.get("Name") != "" and len(self.processed_sections) > 0:
+            # add previous book to list
+            self.current_book["Sections"] = self.processed_sections
+            self.processed_books.append(self.current_book)
+        # start new book
+        self.processed_sections = []
+        self.current_book = {"Name": new_name, "Sections": []}
+
+
+    def save_section(self, new_name):
+        if self.current_section.get("Name") != "" and len(self.processed_groups) > 0:
+            # add previous section to list
+            self.current_section["Groups"] = self.processed_groups
+            self.processed_sections.append(self.current_section)
+        # start new section
+        self.processed_groups = []
+        self.current_section = {"Name": new_name, "Groups": []}
+
+
     def analyse_element(self, el: etree.Element):
         if el.tag == "text" or (el.tag == "div1" and el.get("type").lower() == self.milestones[0]):
-            if self.current_book.get("Name") != "" and len(self.processed_sections) > 0:
-                # add previous book to list
-                self.current_book["Sections"] = self.processed_sections
-                self.processed_books.append(self.current_book)
-            # start new book
-            self.processed_sections = []
-            self.current_book = {"Name": el.get("n"), "Sections": []}
+            self.save_section("")
+            self.save_book(el.get("n"))
 
         elif el.tag == "milestone":
             unit = el.get("unit")
             if unit == self.milestones[0]:  # book
-                if self.current_book.get("Name") != "" and len(self.processed_sections) > 0:
-                    # add previous book to list
-                    self.current_book["Sections"] = self.processed_sections
-                    self.processed_books.append(self.current_book)
-                # start new book
-                self.processed_sections = []
-                self.current_book = {"Name": el.get("n"), "Sections": []}
+                self.save_section("")
+                self.save_book(el.get("n"))
 
             elif unit == self.milestones[1]:  # section
-                if self.current_section.get("Name") != "" and len(self.processed_groups) > 0:
-                    # add previous section to list
-                    self.current_section["Groups"] = self.processed_groups
-                    self.processed_sections.append(self.current_section)
-                # start new section
-                self.processed_groups = []
-                self.current_section = {"Name": el.get("n"), "Groups": []}
+                self.save_section(el.get("n"))
 
         # as far as I can tell, the '3rd milestone', a group, never actually shows up in a citation hint, so it must
         # be artificially put together. I.e., for verse, split on <l> elements, for prose, split on elements.
@@ -104,12 +144,14 @@ class Transformer:
                 {"Name": el.get("n"), "Data": etree.tostring(el, method="text", encoding='UTF-8').decode('utf-8'),
                  "AddNewLine": self.use_new_line})
         else:  # some other kind of element, most likely a emphasis or person name
-            if el.tag == "note" or el.tag == "hi":  # pass on these, as notes just repeat the text already seen
+            if el.tag == "head":  # for the head, add a pointless title
+                return;
+            if el.tag == "note" or el.tag == "hi" :  # pass on these, as notes just repeat the
+                # text already seen
                 self.add_text(el, False)
-                return # skip children of notes
+                return  # skip children of notes
             if el.text or el.tail:
                 self.add_text(el, True)
-
 
         # now run this again for any child elements, so that the correct order is preserved.
 
@@ -129,6 +171,14 @@ class Transformer:
         text_root: etree.Element = root.xpath("/TEI.2/text")[0]
         self.get_hierarchy()
         self.analyse_element(text_root)
+
+        # tidy up loose ends - the last book/etc has to be added, as there will still be data to add, as there is no
+        # final element
+        self.save_section("Finished sections")
+        self.save_book("Finished books")
+
+
+        self.fix_names()
 
         self.output["Books"] = self.processed_books
         self.save_data()

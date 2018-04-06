@@ -11,9 +11,9 @@ namespace server.TextLoader.Models
         /// <summary>
         /// Identifier for the text in the Database
         /// </summary>
-        public int DBId { get; set; }
+        public string Identifier { get; set; }
         public string Name { get; set; }
-        public List<Book> Books { get; set; }
+        public List<Book> Books { get; set; } = new List<Book>();
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ namespace server.TextLoader.Models
     public class Book
     {
         public string Name { get; set; }
-        public List<Section> Sections { get; set; }
+        public List<Section> Sections { get; set; } = new List<Section>();
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ namespace server.TextLoader.Models
     public class Section
     {
         public string Name { get; set; }
-        public List<Group> Groups { get; set; }
+        public List<Group> Groups { get; set; } = new List<Group>();
     }
 
     /// <summary>

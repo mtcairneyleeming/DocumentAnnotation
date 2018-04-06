@@ -1,0 +1,13 @@
+@page
+@model Documents.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+@Html.Partial("Documents/DocumentList", Model)

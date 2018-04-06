@@ -1,0 +1,42 @@
+﻿@model TextDetails
+
+
+
+<h4>Text details</h4>
+<dl class="dl-horizontal">
+    <dt>
+        @Html.DisplayNameFor(model => model.TextData.Title)
+    </dt>
+    <dd>
+        @Html.DisplayFor(model => model.TextData.Title)
+    </dd>
+    <dt>
+        @Html.DisplayNameFor(model => model.TextData.Abbreviation)
+    </dt>
+    <dd>
+        @Html.DisplayFor(model => model.TextData.Abbreviation)
+    </dd>
+    <dt>
+        @Html.DisplayNameFor(model => model.TextData.Identifier)
+    </dt>
+    <dd>
+        @Html.DisplayFor(model => model.TextData.Identifier)
+    </dd>
+</dl>
+<h4>Citations and links</h4>
+<dl class="dl-horizontal">
+    <dt>
+        Citation
+    </dt>
+    <dd>
+        @($"{Model.TextData.Abbreviation} {Model.BookName}.{Model.SectionName}")
+    </dd>
+    <dt>
+        Perseus link
+    </dt>
+    <dd>
+        <a href="@($"http://www.perseus.tufts.edu/hopper/text?doc={Model.TextData.Abbreviation} {Model.BookName}.{Model.SectionName}")">
+            @($"http://www.perseus.tufts.edu/hopper/text?doc={Model.TextData.Abbreviation} {Model.BookName}.{Model.SectionName}")
+        </a>
+    </dd>
+</dl>

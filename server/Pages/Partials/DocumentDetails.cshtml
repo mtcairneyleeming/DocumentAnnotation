@@ -1,0 +1,17 @@
+﻿@model Models.DocumentAnnotation
+
+<h4>Document details</h4>
+<dl class="dl-horizontal">
+    <dt>
+        @Html.DisplayNameFor(model => model.Name)
+    </dt>
+    <dd>
+        @Html.DisplayFor(model => model.Name)
+    </dd>
+    <dt>
+        Created by
+    </dt>
+    <dd>
+        @Html.DisplayFor(model => model.User.UserName)
+    </dd>
+</dl>
