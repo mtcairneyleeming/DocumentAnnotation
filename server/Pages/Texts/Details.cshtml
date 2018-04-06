@@ -18,13 +18,24 @@
             @Html.DisplayFor(model => model.Text.Title)
         </dd>
         <dt>
+            @Html.DisplayNameFor(model => model.Text.Author)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Text.Author)
+        </dd>
+        <dt>
             @Html.DisplayNameFor(model => model.Text.Abbreviation)
         </dt>
         <dd>
             @Html.DisplayFor(model => model.Text.Abbreviation)
         </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Text.Identifier)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Text.Identifier)
+        </dd>
     </dl>
-    @Html.DisplayTextFor(model => model.ActualText.Books[0].Sections[0].Groups[0].Data)
 </div>
 <div>
     <a asp-page="./Edit" asp-route-id="@Model.Text.TextId">Edit</a> |

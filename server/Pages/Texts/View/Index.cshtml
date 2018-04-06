@@ -1,0 +1,45 @@
+﻿@page
+@using Extensions
+@model Texts.Citation.IndexModel
+
+@{
+    ViewData["Title"] = Model.TextData.Title + ", " + Model.TextData.Author;
+}
+
+@section Scripts
+{
+    <script>
+    textNames = @JavaScriptConvert.SerializeObject(Model._loader.CloneNames(Model.FullText.Identifier));
+    bookId = "@Model.Book.Name";
+    sectionId = "@Model.Section.Name";
+    
+    $(window).on('load',
+        function() {
+            initialiseSelects(textNames, bookId);
+        });
+    </script>
+
+}
+
+<h2>@(Model.TextData.Title + ", " + Model.TextData.Author)</h2>
+
+
+
+
+<div class="row">
+    <div class="col-md-8">
+
+        <h3>Book @Html.DisplayFor(m => m.Book.Name), Section @Html.DisplayFor(m => m.Section.Name)</h3>
+        <hr/>
+        <p>
+            @foreach (var group in Model.Section.Groups)
+            {
+                <span>@(group.Data + (group.AddNewLine ? "\n" : ""))</span>
+            }
+        </p>
+    </div>
+    <div class="col-md-4">
+        @await Html.PartialAsync("Partials/TextNavigation")
+        @await Html.PartialAsync("Partials/TextDetails", new TextDetails(Model.TextData, Model.Book.Name, Model.Section.Name))
+    </div>
+</div>

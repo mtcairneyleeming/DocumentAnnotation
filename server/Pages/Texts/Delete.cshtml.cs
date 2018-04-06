@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,9 +8,9 @@ namespace server.Pages.Texts
 {
     public class DeleteModel : PageModel
     {
-        private readonly server.Models.AnnotationContext _context;
+        private readonly AnnotationContext _context;
 
-        public DeleteModel(server.Models.AnnotationContext context)
+        public DeleteModel(AnnotationContext context)
         {
             _context = context;
         }
