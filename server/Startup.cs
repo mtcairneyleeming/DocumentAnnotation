@@ -55,16 +55,10 @@ namespace DocumentAnnotation
                 });
             });
 
-            var skipHTTPS = Configuration.GetValue<bool>("LocalTest:skipHTTPS");
             // requires using Microsoft.AspNetCore.Mvc;
             services.Configure<MvcOptions>(options =>
             {
-                // Set LocalTest:skipHTTPS to true to skip SSL requrement in 
-                // debug mode. This is useful when not using Visual Studio.
-                if (CurrentEnvironment.IsDevelopment() && !skipHTTPS)
-                {
-                    //options.Filters.Add(new RequireHttpsAttribute());
-                }
+               
             });
 
             services.AddIdentity<AppUser, IdentityRole>()
