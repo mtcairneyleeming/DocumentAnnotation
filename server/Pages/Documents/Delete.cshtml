@@ -1,40 +1,42 @@
 @page
-@model Documents.DeleteModel
+@using DocumentAnnotation.Pages.Documents
+@model DocumentAnnotation.Pages.Documents.DeleteModel
 
 @{
     ViewData["Title"] = "Delete";
+    ViewData["PageTitle"] = $"Delete your document";
+    ViewData["PageSubtitle"] = "Are you sure you want to delete this?";
 }
 
-<h2>Delete</h2>
-
-<h3>Are you sure you want to delete this?</h3>
 <div>
-    <h4>DocumentAnnotation</h4>
-    <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.DocumentAnnotation.TextId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.DocumentAnnotation.TextId)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.DocumentAnnotation.UserId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.DocumentAnnotation.UserId)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.DocumentAnnotation.Name)
+            Name:
         </dt>
         <dd>
             @Html.DisplayFor(model => model.DocumentAnnotation.Name)
         </dd>
+        <dt>
+            Text:
+        </dt>
+        <dd>
+            @{
+                var text = Model.Texts.First(t => t.TextId == Model.DocumentAnnotation.TextId);
+            }
+            @text.Title, by @text.Author
+        </dd>
+        <dt>
+            Created by:
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => User.Identity.Name)
+        </dd>
+
     </dl>
-    
+
     <form method="post">
-        <input type="hidden" asp-for="DocumentAnnotation.DocumentAnnotationId" />
-        <input type="submit" value="Delete" class="btn btn-default" /> |
-        <a asp-page="./Index">Back to List</a>
+        <input type="hidden" asp-for="DocumentAnnotation.DocumentAnnotationId"/>
+        <input type="submit" value="Delete" class="btn btn-danger"/> 
+        <a class="btn btn-secondary" asp-page="./Index">Back to List</a>
     </form>
 </div>

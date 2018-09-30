@@ -1,26 +1,326 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssemblyName>DocumentAnnotation</AssemblyName>
+    <RootNamespace>DocumentAnnotation</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Serilog.AspNetCore" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.1.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.1" />
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.1.0-preview1-final" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="TextLoader\processed" />
+    <WebpackInputs Include="app\**\*" />
+    <WebpackInputs Include="webpack.config.ts" />
   </ItemGroup>
+  <ItemGroup>
+    <WebpackOutputs Include="wwwroot\assets\**\*" />
+    <WebpackOutputs Include="wwwroot\css\**\*" />
+    <WebpackOutputs Include="wwwroot\js\**\*" />
+    <WebpackOutputs Remove="wwwroot\assets\**" />
+    <WebpackOutputs Remove="wwwroot\css\**" />
+    <WebpackOutputs Remove="wwwroot\js\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <MvcRazorFilesToCompile Include="Pages\**\*.cshtml" />
+  </ItemGroup>
+  <ItemGroup Condition="'@(WebpackOutputs)' == ''">
+    <!-- 
+          MSBuild skips a target if the Outputs item group evaluates to empty.
+          On the first build, there won't be any Webpack outputs (and we can't
+          predict what they will be because we don't know the hash results for
+          filenames), so instead we tell MSBuild there's an output file which
+          will never exist, which forces the target to always run on first
+          build.
+        -->
+    <WebpackOutputs Include="wwwroot\nonexistent.dat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="app\css\text-view.css" />
+    <Content Include="app\js\AnnotationTypes.ts" />
+    <Content Include="app\js\bundles\page-annotate-view.ts" />
+    <Content Include="app\js\bundles\page-text-view.ts" />
+    <Content Remove="Data\OriginalTexts\**" />
+    <Content Remove="wwwroot\assets\**" />
+    <Content Remove="wwwroot\css\**" />
+    <Content Remove="wwwroot\js\**" />
+    <Content Include="app\js\WebAnnotator.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Data\OriginalTexts\**" />
+    <Compile Remove="wwwroot\assets\**" />
+    <Compile Remove="wwwroot\css\**" />
+    <Compile Remove="wwwroot\js\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Data\OriginalTexts\**" />
+    <EmbeddedResource Remove="wwwroot\assets\**" />
+    <EmbeddedResource Remove="wwwroot\css\**" />
+    <EmbeddedResource Remove="wwwroot\js\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Data\OriginalTexts\**" />
+    <None Remove="wwwroot\assets\**" />
+    <None Remove="wwwroot\css\**" />
+    <None Remove="wwwroot\js\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fontawesome-webfont.674f50d287a8c48dc19ba404d20fe713.eot" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fontawesome-webfont.912ec66d7572ff821749319396470bde.svg" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fontawesome-webfont.af7ae505a9eed503f8b8e6982036873e.woff2" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fontawesome-webfont.b06871f281fee6b241d60582ae9369b9.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fontawesome-webfont.fee66e712a8a08eef5805a46892932ad.woff" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\bootstrap.883be1144672731e47fa.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\bootstrap.883be1144672731e47fa.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\font-awesome.53355487015c9fdc1b3f.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\font-awesome.53355487015c9fdc1b3f.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.0300b31e69113362b05f.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.0300b31e69113362b05f.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.08ec53c1a445b6b26da4.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.08ec53c1a445b6b26da4.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.30635d20632e3c824f60.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.30635d20632e3c824f60.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.48bbf50bf19b82ed9a00.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.48bbf50bf19b82ed9a00.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.4c1ced334ef8a614f279.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.4c1ced334ef8a614f279.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.6ec7d66ea12f2312ba7c.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.6ec7d66ea12f2312ba7c.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.771bb8226180f308308f.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.771bb8226180f308308f.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.801ac69444ba50c496c9.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.801ac69444ba50c496c9.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.83fcdf4c11a243408de4.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.83fcdf4c11a243408de4.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.84b236c0a5b051395ba0.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.84b236c0a5b051395ba0.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.92541bdeb47de4cf6aad.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.92541bdeb47de4cf6aad.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.99a5636a936cfb82fb11.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.99a5636a936cfb82fb11.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.9dedbdf17506649591fe.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.9dedbdf17506649591fe.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.9e74720ba5c3e4672791.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.9e74720ba5c3e4672791.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.a57fc5296ad692507487.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.a57fc5296ad692507487.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.ae3f8283d540b605d90c.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.ae3f8283d540b605d90c.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.aebcffb090d30d5b8747.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.aebcffb090d30d5b8747.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.b4d7748d7bf43e3bb032.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.b4d7748d7bf43e3bb032.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.b9758f53a74998ccda9e.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.b9758f53a74998ccda9e.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.bc5530bc5f5dd7243cdc.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.bc5530bc5f5dd7243cdc.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.cf7226b3243e2da347f5.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.cf7226b3243e2da347f5.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.d62e788fd12f586be7ab.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.d62e788fd12f586be7ab.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.e32931fdc767c516b99a.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.e32931fdc767c516b99a.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.f3302b7914b89e965b9f.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.f3302b7914b89e965b9f.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.f3c042e69067de3fd2bd.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.f3c042e69067de3fd2bd.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.f85f6c1134febc6fe367.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.f85f6c1134febc6fe367.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.fc0d0222b775c420a33a.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-edit.fc0d0222b775c420a33a.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.30635d20632e3c824f60.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.30635d20632e3c824f60.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.771bb8226180f308308f.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.771bb8226180f308308f.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.84b236c0a5b051395ba0.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.84b236c0a5b051395ba0.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.9dedbdf17506649591fe.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.9dedbdf17506649591fe.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.9e74720ba5c3e4672791.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.9e74720ba5c3e4672791.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.cf7226b3243e2da347f5.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.cf7226b3243e2da347f5.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.e32931fdc767c516b99a.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.e32931fdc767c516b99a.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.f3c042e69067de3fd2bd.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.f3c042e69067de3fd2bd.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.f85f6c1134febc6fe367.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-annotate-view.f85f6c1134febc6fe367.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-common.8601083897afeaaa5ed8.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-common.8601083897afeaaa5ed8.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-common.bfc18284c21951c19937.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-common.bfc18284c21951c19937.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-common.d2c64e0e3f23358953ff.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-common.d2c64e0e3f23358953ff.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-common.e65d5a2c88af60f0df53.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-common.e65d5a2c88af60f0df53.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-text-view.2d70a9d799da45cfd51b.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-text-view.2d70a9d799da45cfd51b.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-text-view.48d00e7c4f7f98fcfb15.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-text-view.48d00e7c4f7f98fcfb15.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-text-view.6b9170d3f6423227ece1.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-text-view.6b9170d3f6423227ece1.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-text-view.d88ee571815c9d5178df.dev.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\page-text-view.d88ee571815c9d5178df.dev.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\bootstrap.0372fe54906087133550.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\bootstrap.0372fe54906087133550.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\bootstrap.65f79f84955c96e6998a.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\bootstrap.65f79f84955c96e6998a.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\jquery.1015e540dc098ea80e77.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\jquery.1015e540dc098ea80e77.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\jquery.64ac4e8ac9facdb4b6f5.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\jquery.64ac4e8ac9facdb4b6f5.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.03acfa56c324d4be6eb7.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.03acfa56c324d4be6eb7.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.0698480b89bebd6e142c.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.0698480b89bebd6e142c.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.0ce819cbda40ef6f73c4.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.0ce819cbda40ef6f73c4.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.117b9b348a4681198187.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.117b9b348a4681198187.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.129bfee8f3c199621940.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.129bfee8f3c199621940.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.130b0082cce7ec78e181.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.130b0082cce7ec78e181.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.140bf133f0442b7aef31.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.140bf133f0442b7aef31.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.238ded5dc53f2b6fc01b.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.238ded5dc53f2b6fc01b.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.2bafd4115b85ef35e3e0.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.2bafd4115b85ef35e3e0.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.2dadf7c79e4b0d167aa6.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.2dadf7c79e4b0d167aa6.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.325e253766a0800134bc.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.325e253766a0800134bc.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.364df2d44c058da70408.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.364df2d44c058da70408.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.36589782beda6b174674.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.36589782beda6b174674.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.36ab5f3b61b218bd0b58.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.36ab5f3b61b218bd0b58.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.397ab25e580d7e2b6361.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.397ab25e580d7e2b6361.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.3b72bab28e84ac545ac8.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.3b72bab28e84ac545ac8.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.4106aaf679873bcb5de0.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.4106aaf679873bcb5de0.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.4603984ae4d3d78b9ebc.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.4603984ae4d3d78b9ebc.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.526559b7edf5a77e9627.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.526559b7edf5a77e9627.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.5f5f310c6e43000776a0.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.5f5f310c6e43000776a0.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.6d0571d4994d3d763c14.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.6d0571d4994d3d763c14.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.6d620f6027c7fe993b81.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.6d620f6027c7fe993b81.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.7299befa4835c2c98616.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.7299befa4835c2c98616.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.75441e5e5346dde96051.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.75441e5e5346dde96051.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.79b36a30256d187fe6b5.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.79b36a30256d187fe6b5.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.7a7309ac4baf5d7f8ef4.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.7a7309ac4baf5d7f8ef4.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.95140925fdd3feb3698b.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.95140925fdd3feb3698b.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.95e87c79bf620d1c72cb.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.95e87c79bf620d1c72cb.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.9a020b1e1f1ae0fe2b93.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.9a020b1e1f1ae0fe2b93.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.9e0a0316979c5c0a0549.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.9e0a0316979c5c0a0549.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.9e12108d328ac259db46.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.9e12108d328ac259db46.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.9f061a551dea7ba007d1.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.9f061a551dea7ba007d1.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.aa34e483863451f3c221.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.aa34e483863451f3c221.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.ab9d271020b86a01a98c.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.ab9d271020b86a01a98c.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.b13407016486ab90cf97.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.b13407016486ab90cf97.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.b1d32b38bf6ac5e0d47d.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.b1d32b38bf6ac5e0d47d.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.b3518019e11cf9d8ac6c.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.b3518019e11cf9d8ac6c.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.b3fe5f01f56f781a3c9c.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.b3fe5f01f56f781a3c9c.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.bcd0392113d2853286ba.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.bcd0392113d2853286ba.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.be9aeed601eaa83f0b6b.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.be9aeed601eaa83f0b6b.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.c19b38a09c82032bb473.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.c19b38a09c82032bb473.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.c681b96bc1f07014bedb.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.c681b96bc1f07014bedb.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.c734f4ecef058152b259.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.c734f4ecef058152b259.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.d6e7fd7b16db05c96099.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.d6e7fd7b16db05c96099.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.de31c45241864a75c674.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.de31c45241864a75c674.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.e797a99e2fd3195dcd6b.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.e797a99e2fd3195dcd6b.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.e8c658f3880c5a681b14.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.e8c658f3880c5a681b14.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.e95d359478015399f015.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.e95d359478015399f015.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.f6376c5fa2ef9c54b962.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-edit.f6376c5fa2ef9c54b962.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.2b9d192a610d04e03c17.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.2b9d192a610d04e03c17.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.4b163b1ecb89becabbc8.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.4b163b1ecb89becabbc8.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.64c66d43e6bf2d28710e.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.64c66d43e6bf2d28710e.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.71075089f491dcd55fa3.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.71075089f491dcd55fa3.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.710eaf119d776a7b06a9.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.710eaf119d776a7b06a9.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.9a9b2c5457effe9a7f35.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.9a9b2c5457effe9a7f35.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.c49aaa3b027122e8192c.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-annotate-view.c49aaa3b027122e8192c.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-common.4ab5d479d3da05aa37d8.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-common.4ab5d479d3da05aa37d8.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-common.9c9fdc5e71e2996d128d.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-common.9c9fdc5e71e2996d128d.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-common.ff83f032663ce8c1ab78.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-common.ff83f032663ce8c1ab78.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-text-view.25662d339a2a2406d98d.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-text-view.25662d339a2a2406d98d.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-text-view.6dfa7163ada36f330870.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-text-view.6dfa7163ada36f330870.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-text-view.833b5857f82f848067a8.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\page-text-view.833b5857f82f848067a8.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\polyfills.2d18b9598fd1e90d9d41.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\polyfills.2d18b9598fd1e90d9d41.dev.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\polyfills.e503f8d61288073da976.dev.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\polyfills.e503f8d61288073da976.dev.js.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot" />
+  </ItemGroup>
+  <Target Name="CompileWebpack" BeforeTargets="Build;">
+    <Exec Command="npm run tsc-build" ContinueOnError="true" />
+  </Target>
+  <Target Name="BuildClientAssets" BeforeTargets="BeforeBuild;MvcRazorPrecompile" Inputs="@(WebpackInputs)" Outputs="@(WebpackOutputs)">
+    <ItemGroup>
+      <MvcRazorFilesToCompile Include="Pages\Partials\Generated\*.cshtml" />
+    </ItemGroup>
+  </Target>
+  <Target Name="PrecompileRazorViews" AfterTargets="Build;BuildClientAssets" DependsOnTargets="MvcRazorPrecompile" />
 </Project>

@@ -1,14 +1,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using DocumentAnnotation.Extensions;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using server.Extensions;
-using server.Models;
 
-namespace server.Pages.Account
+namespace DocumentAnnotation.Pages.Account
 {
     public class LoginWithRecoveryCodeModel : PageModel
     {
@@ -65,12 +65,13 @@ namespace server.Pages.Account
             var recoveryCode = Input.RecoveryCode.Replace(" ", string.Empty);
 
             var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
-                
+
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with a recovery code.", user.Id);
                 return LocalRedirect(Url.GetLocalUrl(returnUrl));
             }
+
             if (result.IsLockedOut)
             {
                 _logger.LogWarning("User with ID '{UserId}' account locked out.", user.Id);

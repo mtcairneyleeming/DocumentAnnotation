@@ -1,3 +1,4 @@
+@using DocumentAnnotation.Extensions
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,66 +7,51 @@
     <title>@ViewData["Title"] - DocumentAnnotation</title>
 
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    @await Html.WebpackStylesAsync("page-common")
     @RenderSection("Styles", false)
 </head>
 <body>
-<nav class="navbar sticky-top navbar-expand-lg navbar-light">
-    <a class="navbar-brand" asp-page="/Index">DocumentAnnotation</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" asp-page="/Documents/Index">My Documents</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" asp-page="/Texts/Index">Texts</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="reload-texts-button" href="#"><img src="~/images/iconic/reload.svg" alt="Reload texts"/> Reload texts</a>
-                
-            </li>
-            
-           
-            
-        </ul>
-        @await Html.PartialAsync("Partials/_LoginPartial")
-            
-        
-    </div>
-</nav>
+@await Html.PartialAsync("Partials/_HeaderPartial")
 
 <div class="container-fluid body-content">
-    @RenderBody()
+    <div class="row">
+        <div id="contentContainer" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            @if (ViewData["UsePageTitle"] is null || (bool)ViewData["UsePageTitle"] )
+            {
+                <div id="title">
+                    <h2>@ViewData["PageTitle"]</h2>
+
+                    <h4>@ViewData["PageSubtitle"]</h4>
+                    <hr/>
+                </div>
+            }
+            @RenderBody()
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+            @RenderSection("Sidebar", false)
+        </div>
+    </div>
+
     <hr/>
     <footer>
-        <p>&copy; 2017 - server</p>
+        <p>&copy; 2018 Max Cairney-Leeming</p>
     </footer>
 </div>
 
 
-<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script src="~/lib/jquery-rotate/rotate.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
+@await Html.WebpackScriptsAsync("page-common")
 <script>
-    $(function () {
+    $(function() {
         $("#reload-texts-button").click(function(e) {
             e.preventDefault();
-            $.post("@Url.Action("Reload","Reload")");
-            $("#reload-texts-button > img").rotate({
-                angle: 0,
-                animateTo: 360
-            });
-            /*setTimeout(() => {
-                    $("#reload-texts-button > img").rotate(0);
+            $.post("@Url.Action("Reload", "Reload")");
+            const icon = document.getElementById("reload-icon");
+            icon.classList.add("fa-spin");
+            setTimeout(() => {
+                    icon.classList.remove("fa-spin");
+                    window.location.reload();
                 },
-                1000);*/
+                510);
 
         });
     })

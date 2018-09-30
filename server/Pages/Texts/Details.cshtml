@@ -1,5 +1,6 @@
 @page
-@model Texts.DetailsModel
+@using DocumentAnnotation.Pages.Texts
+@model DocumentAnnotation.Pages.Texts.DetailsModel
 
 @{
     ViewData["Title"] = "Details";
@@ -9,7 +10,7 @@
 
 <div>
     <h4>Text</h4>
-    <hr />
+    <hr/>
     <dl class="dl-horizontal">
         <dt>
             @Html.DisplayNameFor(model => model.Text.Title)

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using server.Models;
 
-namespace server.Pages.Documents
+namespace DocumentAnnotation.Pages.Documents
 {
     public class IndexModel : PageModel
     {
@@ -15,11 +15,11 @@ namespace server.Pages.Documents
             _context = context;
         }
 
-        public IList<DocumentAnnotation> DocumentAnnotation { get;set; }
+        public IList<Models.DocumentAnnotation> DocumentAnnotation { get; set; }
 
         public async Task OnGetAsync()
         {
-            DocumentAnnotation = await _context.DocumentAnnotations.Include(da=> da.User).Include(da=> da.Text).ToListAsync();
+            DocumentAnnotation = await _context.DocumentAnnotations.Include(da => da.User).Include(da => da.Text).ToListAsync();
         }
     }
 }

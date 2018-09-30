@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using server.Models;
 
-namespace server.Pages.Account.Manage
+namespace DocumentAnnotation.Pages.Account.Manage
 {
     public class EnableAuthenticatorModel : PageModel
     {
@@ -117,6 +117,7 @@ namespace server.Pages.Account.Manage
                 result.Append(unformattedKey.Substring(currentPosition, 4)).Append(" ");
                 currentPosition += 4;
             }
+
             if (currentPosition < unformattedKey.Length)
             {
                 result.Append(unformattedKey.Substring(currentPosition));

@@ -1,10 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using server.Models;
 
-namespace server.Pages.Documents
+namespace DocumentAnnotation.Pages.Documents
 {
     public class DeleteModel : PageModel
     {
@@ -16,8 +18,9 @@ namespace server.Pages.Documents
         }
 
         [BindProperty]
-        public DocumentAnnotation DocumentAnnotation { get; set; }
+        public Models.DocumentAnnotation DocumentAnnotation { get; set; }
 
+        public IList<TextData> Texts { get; set; }
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -26,11 +29,13 @@ namespace server.Pages.Documents
             }
 
             DocumentAnnotation = await _context.DocumentAnnotations.SingleOrDefaultAsync(m => m.DocumentAnnotationId == id);
-
+            Texts = _context.Texts.ToList();
+            
             if (DocumentAnnotation == null)
             {
                 return NotFound();
             }
+
             return Page();
         }
 

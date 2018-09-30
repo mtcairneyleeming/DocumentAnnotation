@@ -1,6 +1,8 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
-namespace server.Models
+namespace DocumentAnnotation.Models
 {
     public class Highlight
     {
@@ -8,21 +10,19 @@ namespace server.Models
         {
         }
 
-        public Highlight(Location start, Location end)
-        {
-            if (start > end)
-            {
-                throw new ArgumentException("The end of a highlight must come after it starts");
-            }
-            Start = start;
-            End = end;
-        }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int HighlightId { get; set; }
-        
-        public Location Start { get; set; }
-        public Location End { get; set; }
-        
+
+        public Location Location { get; set; }
+
+        [JsonIgnore]
         public Annotation Annotation { get; set; }
+
         public int AnnotationId { get; set; }
+
+        public override string ToString()
+        {
+            return $"{nameof(HighlightId)}: {HighlightId}, {nameof(Location)}: {Location}, {nameof(AnnotationId)}: {AnnotationId}";
+        }
     }
 }

@@ -1,8 +1,8 @@
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using server.Services;
+using DocumentAnnotation.Services;
 
-namespace server.Extensions
+namespace DocumentAnnotation.Extensions
 {
     public static class EmailSenderExtensions
     {

@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using DocumentAnnotation.Models;
+using DocumentAnnotation.TextLoader.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using server.Models;
-using server.Pages.Annotate;
-using server.TextLoader.Models;
 
-namespace server.Pages.Texts.View
+namespace DocumentAnnotation.Pages.Texts.View
 {
     public class IndexModel : PageModel
     {
@@ -18,7 +17,6 @@ namespace server.Pages.Texts.View
         {
             _context = context;
             _loader = loader;
-
         }
 
         public TextData TextData { get; set; }
@@ -35,16 +33,15 @@ namespace server.Pages.Texts.View
         public Book Book => FullText.Books[BookNum];
         public Section Section => Book.Sections[SectionNum];
         public List<Group> Groups => Section.Groups;
-        public DocumentAnnotation DocAnn { get; set; }
+        public Models.DocumentAnnotation DocAnn { get; set; }
 
-        public Annotator Annotator { get; private set; }
+        public Annotator.Annotator Annotator { get; private set; }
 
 
         public IActionResult OnGet(string textIdentifier, string book, string section)
         {
-        
             // load the text requested
-            TextData = _context.Texts.SingleOrDefault(t=> t.Identifier == textIdentifier);
+            TextData = _context.Texts.SingleOrDefault(t => t.Identifier == textIdentifier);
 
             if (TextData == null)
             {
@@ -65,7 +62,6 @@ namespace server.Pages.Texts.View
             else
             {
                 (BookNum, SectionNum) = _loader.GetIndexFromName(TextData.Identifier, book, section);
-
             }
 
             FullText = _loader.LoadText(TextData.Identifier);

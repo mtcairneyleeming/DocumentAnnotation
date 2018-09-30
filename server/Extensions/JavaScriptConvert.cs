@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Html;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace server.Extensions
+namespace DocumentAnnotation.Extensions
 {
     public static class JavaScriptConvert
     {

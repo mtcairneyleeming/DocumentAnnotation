@@ -1,44 +1,37 @@
 ﻿@page
-@model server.Pages.IndexModel
-@using server.Models
+@using DocumentAnnotation.Models
+@using DocumentAnnotation.Pages
+@model global::DocumentAnnotation.Pages.IndexModel
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
 
 @{
     ViewData["Title"] = "Home";
+    ViewData["UsePageTitle"] = false;
 }
 @if (SignInManager.IsSignedIn(User))
 {
     <div class="jumbotron">
 
         <h1 class="display-4">Welcome!</h1>
-        <p class="lead">Use the .</p>
-        <hr class="my-4">
-        <p>Once logged in, use the buttons above or below to read texts, annotate them and read your annotations.</p>
-        <p class="lead">
-            <a class="btn btn-primary btn-lg" asp-page="/Account/Login" role="button">Log in</a>
-            or
-            <a class="btn btn-primary btn-lg" asp-page="/Account/Register" role="button">Register</a>
-        </p>
+        <p class="lead">Use the lists below or the links to find the text/document you'd like.</p>
     </div>
     <div class="row">
-    <div class="col-md-6">
-        <h4>Texts</h4>
-        @{
-            var textsModel = new Texts.IndexModel(Model._context);
-            await textsModel.OnGetAsync();
-                
-        }
-        @Html.Partial("Texts/TextList", textsModel)
-    </div>
+        <div class="col-md-6">
+            <h4>AvailableTexts</h4>
+            @{
+                var textsModel = new global::DocumentAnnotation.Pages.Texts.IndexModel(Model._context);
+                await textsModel.OnGetAsync();
+            }
+            @await Html.PartialAsync("Texts/TextList", textsModel)
+        </div>
         <div class="col-md-6">
             <h4>Your Documents</h4>
             @{
-                var docsModel = new Documents.IndexModel(Model._context);
+                var docsModel = new global::DocumentAnnotation.Pages.Documents.IndexModel(Model._context);
                 await docsModel.OnGetAsync();
-
             }
-            @Html.Partial("Documents/DocumentList", docsModel)
+            @await Html.PartialAsync("Documents/DocumentList", docsModel)
         </div>
     </div>
 }
@@ -57,4 +50,3 @@ else
         </p>
     </div>
 }
-

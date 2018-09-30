@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using server.Models;
 
-namespace server.Controllers
+namespace DocumentAnnotation.Controllers
 {
     [Route("[controller]/[action]")]
     public class AccountController : Controller

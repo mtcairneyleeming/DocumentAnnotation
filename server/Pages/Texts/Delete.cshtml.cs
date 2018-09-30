@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using server.Models;
 
-namespace server.Pages.Texts
+namespace DocumentAnnotation.Pages.Texts
 {
     public class DeleteModel : PageModel
     {
@@ -31,6 +31,7 @@ namespace server.Pages.Texts
             {
                 return NotFound();
             }
+
             return Page();
         }
 

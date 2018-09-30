@@ -1,12 +1,12 @@
 using System;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using server.Models;
 
-namespace server.Pages.Account.Manage
+namespace DocumentAnnotation.Pages.Account.Manage
 {
     public class Disable2faModel : PageModel
     {
@@ -31,7 +31,8 @@ namespace server.Pages.Account.Manage
 
             if (!await _userManager.GetTwoFactorEnabledAsync(user))
             {
-                throw new ApplicationException($"Cannot disable 2FA for user with ID '{_userManager.GetUserId(User)}' as it's not currently enabled.");
+                throw new ApplicationException(
+                    $"Cannot disable 2FA for user with ID '{_userManager.GetUserId(User)}' as it's not currently enabled.");
             }
 
             return Page();

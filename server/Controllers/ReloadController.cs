@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace server.Controllers
+namespace DocumentAnnotation.Controllers
 {
     public class ReloadController : Controller
     {
         private readonly TextLoader.TextLoader _textLoader;
-        
-        
+
+
         public ReloadController(TextLoader.TextLoader textLoader)
         {
             _textLoader = textLoader;
         }
-        
+
         [HttpPost]
         public EmptyResult Reload()
         {

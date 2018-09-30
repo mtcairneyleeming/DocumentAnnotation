@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using DocumentAnnotation.TextLoader.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using server.TextLoader.Models;
 using Serilog;
 
-namespace server.TextLoader
+namespace DocumentAnnotation.TextLoader
 {
     /// <summary>
     /// Load texts, e.g. the Pro Milone from local xml files, as stored by Perseus. This keeps a cache of files, and is used as a singleton.
@@ -17,11 +18,13 @@ namespace server.TextLoader
     {
         private readonly List<Text> _texts = new List<Text>();
         private readonly IOptions<Config> _config;
-
-        public TextLoader(IOptions<Config> config)
+        private IHostingEnvironment _hostingEnvironment;
+        public TextLoader(IOptions<Config> config, IHostingEnvironment env)
         {
             _config = config;
+            _hostingEnvironment = env;
         }
+
         /// <summary>
         /// Clear the currently loaded texts so that new loads must use the file system
         /// </summary>
@@ -39,7 +42,7 @@ namespace server.TextLoader
                 return GetLoaded(textIdentifier);
             }
 
-            using (var originalFile = File.OpenRead($"{_config.Value.ProcessedTexts}/{textIdentifier}.json.gz"))
+            using (var originalFile = File.OpenRead($"{_hostingEnvironment.ContentRootPath}/Data/ProcessedTexts/{textIdentifier}.json.gz"))
             {
                 using (GZipStream decompressionStream = new GZipStream(originalFile, CompressionMode.Decompress))
                 {
@@ -55,10 +58,10 @@ namespace server.TextLoader
         private bool IsLoaded(string textIdentifier)
         {
             return _texts.Any(t => t.Identifier == textIdentifier);
-            
         }
-        
-        private Text GetLoaded(string textIdentifier){
+
+        private Text GetLoaded(string textIdentifier)
+        {
             return _texts.FirstOrDefault(t => t.Identifier == textIdentifier);
         }
 
@@ -72,6 +75,7 @@ namespace server.TextLoader
                     return i;
                 }
             }
+
             throw new ArgumentOutOfRangeException($"No book of name {bookName} exists in the text with identifier {textIdentifier}");
         }
 
@@ -84,18 +88,17 @@ namespace server.TextLoader
             {
                 var testName = text.Books[book].Sections[i].Name;
                 //Log.Information(text.Books[book].Sections[i].Name);
-                
+
                 if (testName == sectionName)
                 {
-                    
-                    return (book,i);
+                    return (book, i);
                 }
             }
-            
-            throw new ArgumentOutOfRangeException($"No section of name {sectionName} exists in the book {bookName} of the text with identifier {textIdentifier}");
-           
+
+            throw new ArgumentOutOfRangeException(
+                $"No section of name {sectionName} exists in the book {bookName} of the text with identifier {textIdentifier}");
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -117,11 +120,11 @@ namespace server.TextLoader
             {
                 return ret;
             }
-            ret.Books[0].Sections = new List<Section> { ret.Books[0].Sections[section.Value]};
+
+            ret.Books[0].Sections = new List<Section> {ret.Books[0].Sections[section.Value]};
 
             return ret;
-
-        } 
+        }
 
         /// <summary>
         /// Load a full text and return only the names of the books and sections within it.
@@ -142,39 +145,40 @@ namespace server.TextLoader
                 var newBook = new Book()
                 {
                     Name = book.Name
-                        
                 };
                 foreach (var section in book.Sections)
                 {
-                    newBook.Sections.Add(new Section(){Name = section.Name});
+                    newBook.Sections.Add(new Section() {Name = section.Name});
                 }
+
                 ret.Books.Add(newBook);
             }
-            return ret;
 
-        } 
+            return ret;
+        }
 
         public Text LoadBook(string textIdentifier, string book)
         {
             var id = GetIndexFromName(textIdentifier, book);
             return CloneText(textIdentifier, id);
         }
-        
+
         public Text LoadBook(string textIdentifier, int bookNum)
         {
             return CloneText(textIdentifier, bookNum);
         }
+
         public Text LoadSection(string textIdentifier, string book, string section)
         {
             var id = GetIndexFromName(textIdentifier, book, section);
             return CloneText(textIdentifier, id.book, id.section);
         }
-        
+
         public Text LoadSection(string textIdentifier, int bookNum, int sectionNum)
         {
             return CloneText(textIdentifier, bookNum, sectionNum);
         }
-        
+
         public Text LoadSection(string textIdentifier, string book, int sectionNum)
         {
             var id = GetIndexFromName(textIdentifier, book);

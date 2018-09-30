@@ -1,3 +1,5 @@
+using DocumentAnnotation.Models;
+using DocumentAnnotation.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -8,15 +10,14 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using server.Models;
-using server.Services;
 using Swashbuckle.AspNetCore.Swagger;
 
-namespace server
+namespace DocumentAnnotation
 {
     public class Config
     {
         public string ProcessedTexts { get; set; }
+        public string InvitationCode { get; set; }
     }
 
     public class Startup
@@ -38,8 +39,9 @@ namespace server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var dbString = Configuration.GetValue<string>("DBConnectionString");
             services.AddEntityFrameworkNpgsql().AddDbContext<AnnotationContext>(options =>
-                options.UseNpgsql("Server=localhost;Database=annotations"));
+                options.UseNpgsql(dbString));
             services.AddMvc();
             /*Adding swagger generation with default settings*/
             services.AddSwaggerGen(options =>
@@ -69,11 +71,11 @@ namespace server
                 .AddEntityFrameworkStores<AnnotationContext>()
                 .AddDefaultTokenProviders();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
-            services.Configure<Config>(Configuration.GetSection("Config"));
-            
+            services.Configure<Config>(Configuration.GetSection("AppConfig"));
+
             services.AddSingleton<TextLoader.TextLoader>();
             services.AddSingleton<IEmailSender, EmailSender>();
-            
+
             // enforce authentication by default
             services.AddMvc(config =>
             {
@@ -82,6 +84,7 @@ namespace server
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
             });
+            services.AddCors();
             
         }
 
@@ -89,7 +92,7 @@ namespace server
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             CurrentEnvironment = env;
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -108,17 +111,13 @@ namespace server
                     template: "{controller}/{action=Index}/{id?}");
             });
 
-            app.UseSwagger(c =>
-            {
-                c.PreSerializeFilters.Add((swaggerDoc, httpReq) => swaggerDoc.Host = httpReq.Host.Value);
-            });
+            app.UseSwagger(c => { c.PreSerializeFilters.Add((swaggerDoc, httpReq) => swaggerDoc.Host = httpReq.Host.Value); });
 
-            
 
             /*Enabling Swagger ui, consider doing it on Development env only*/
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1"); });
             app.UseMvcWithDefaultRoute();
-            
+            app.UseCors(builder => { builder.WithOrigins("http://latin.maxcl.co.uk", "https://latin.maxcl.co.uk", "http://localhost:5002").AllowAnyMethod(); });
         }
     }
 }

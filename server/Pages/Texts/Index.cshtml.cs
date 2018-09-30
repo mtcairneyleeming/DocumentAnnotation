@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using server.Models;
 
-namespace server.Pages.Texts
+namespace DocumentAnnotation.Pages.Texts
 {
     public class IndexModel : PageModel
     {
@@ -15,7 +15,7 @@ namespace server.Pages.Texts
             _context = context;
         }
 
-        public IList<TextData> Text { get;set; }
+        public IList<TextData> Text { get; set; }
 
         public async Task OnGetAsync()
         {

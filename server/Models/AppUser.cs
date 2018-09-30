@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
-namespace server.Models
+namespace DocumentAnnotation.Models
 {
     public class AppUser : IdentityUser
     {

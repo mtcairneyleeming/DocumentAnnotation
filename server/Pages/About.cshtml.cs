@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace server.Pages
+namespace DocumentAnnotation.Pages
 {
     [AllowAnonymous]
     public class AboutModel : PageModel

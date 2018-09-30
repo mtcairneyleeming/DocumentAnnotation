@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace server.Pages
+namespace DocumentAnnotation.Pages
 {
     public class ErrorModel : PageModel
     {

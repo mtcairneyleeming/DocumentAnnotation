@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace server.Services
+namespace DocumentAnnotation.Services
 {
     public interface IEmailSender
     {

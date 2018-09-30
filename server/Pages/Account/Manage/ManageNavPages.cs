@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace server.Pages.Account.Manage
+namespace DocumentAnnotation.Pages.Account.Manage
 {
     public static class ManageNavPages
     {
@@ -21,11 +21,11 @@ namespace server.Pages.Account.Manage
         public static string ExternalLoginsNavClass(ViewContext viewContext) => PageNavClass(viewContext, ExternalLogins);
 
         public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAuthentication);
-    
+
         public static string PageNavClass(ViewContext viewContext, string page)
         {
             var activePage = viewContext.ViewData["ActivePage"] as string
-                ?? Path.GetFileNameWithoutExtension(viewContext.ActionDescriptor.DisplayName);
+                             ?? Path.GetFileNameWithoutExtension(viewContext.ActionDescriptor.DisplayName);
             return string.Equals(activePage, page, StringComparison.OrdinalIgnoreCase) ? "active" : null;
         }
     }

@@ -1,18 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
-using server.Models;
-using server.TextLoader.Models;
+using DocumentAnnotation.Models;
+using DocumentAnnotation.TextLoader.Models;
+using Npgsql.TypeHandlers;
 
-namespace server.Pages.Annotate
+namespace DocumentAnnotation.Annotator
 {
-    using GroupData = List<PairWithData>;
-
     public class Annotator
     {
         public Annotator(List<Annotation> annotations, List<Group> groups)
         {
-            Annotations = annotations;
+            Annotations = annotations.Where(a=> a.Highlights.Count > 0).OrderBy(a=> a.Highlights[0].Location).ToList();
+            Annotations.AddRange(annotations.Where(a=> a.Highlights.Count == 0));
             Groups = groups;
+            Run();
         }
 
 
@@ -20,10 +21,7 @@ namespace server.Pages.Annotate
         public List<Annotation> Annotations { get; }
         private List<Group> Groups { get; }
 
-        // output
-
-        public List<GroupData> TransformedData { get; } = new List<GroupData>();
-
+        
 
         // internal working 
         /// <summary>
@@ -59,7 +57,6 @@ namespace server.Pages.Annotate
                 {
                     HighlightType.Highlight, new Dictionary<int, string>
                     {
-                        {1, "#ffff00"},
                         {2, "#48CCC9"},
                         {3, "#FFA858"},
                         {4, "#74FFAD"},
@@ -82,12 +79,12 @@ namespace server.Pages.Annotate
         /// <summary>
         /// Generate a list of (hopefully) distinct colours with which to highlight stuff
         /// </summary>
-        public void GenerateHighlightData()
+        private void GenerateHighlightData()
         {
-            for (int i = 0; i < Annotations.Count; i++)
+            for (var i = 0; i < Annotations.Count; i++)
             {
-                var h = i % 12; // number of the highlight this annotation will receive
-                if (h < 4) // leads to annU1...4
+                var h = Annotations[i].AnnotationId % 11; // number of the highlight this annotation will receive
+                if (h < 4) // leads to annU2...5
                 {
                     AnnotationData.Add(Annotations[i].AnnotationId, new AnnotationData
                     {
@@ -95,11 +92,11 @@ namespace server.Pages.Annotate
                         Type = HighlightType.Underline
                     });
                 }
-                else if (h < 10) // leads to annH1...6
+                else if (h < 9) // leads to annH2...6
                 {
                     AnnotationData.Add(Annotations[i].AnnotationId, new AnnotationData
                     {
-                        Colour = h - 5,
+                        Colour = h - 2,
                         Type = HighlightType.Highlight
                     });
                 }
@@ -107,7 +104,7 @@ namespace server.Pages.Annotate
                 {
                     AnnotationData.Add(Annotations[i].AnnotationId, new AnnotationData
                     {
-                        Colour = h - 9,
+                        Colour = h - 8,
                         Type = HighlightType.Bracket
                     });
                 }
@@ -117,24 +114,18 @@ namespace server.Pages.Annotate
         private void SimplifyHighlights()
         {
             Highlights.Clear();
-            for (int i = 0; i < Groups.Count; i++)
+            for (var i = 0; i < Groups.Count; i++)
             {
                 Highlights.Add(new List<SimpleHighlight>());
-                var group = Groups[i];
                 foreach (var annotation in Annotations)
                 {
                     foreach (var h in annotation.Highlights)
                     {
-                        if (h.Start.GroupNumber > i || h.End.GroupNumber < i)
-                        {
-                            // ignore
-                        }
-                        else
+                        if (h.Location.GroupNumber == i)
                         {
                             Highlights[i].Add(new SimpleHighlight
                             {
-                                Start = h.Start.GroupNumber == i ? h.Start.Character : 0,
-                                End = h.End.GroupNumber == i ? h.End.Character : group.Data.Length - 1,
+                                WordNumber = h.Location.WordNumber,
                                 AnnotationId = annotation.AnnotationId
                             });
                         }
@@ -143,68 +134,90 @@ namespace server.Pages.Annotate
             }
         }
 
-        private List<Pair> FindSplittingPairs(int groupNo)
+        private bool IsWordHighlighted(int groupNo, int wordNo, int annId)
         {
-            // so as to split the group into as few <span>'s as possible, work out where boundaries must go.
-
-            var splitPoints = new HashSet<int>();
-            foreach (var h in Highlights[groupNo])
+            foreach (var highlight in Highlights[groupNo])
             {
-                splitPoints.Add(h.Start);
-                splitPoints.Add(h.End + 1);
+                if (highlight.WordNumber == wordNo && highlight.AnnotationId == annId)
+                {
+                    return true;
+                }
             }
 
-            splitPoints.Add(0); // add so all the text is actually rendered
-            splitPoints.Add(Groups[groupNo].Data.Length); // as above
-
-            var sortedPoints = splitPoints.ToList().OrderBy(o => o).ToList();
-
-            var pairs = new List<Pair>();
-
-            for (var l = 0; l < sortedPoints.Count - 1; l++)
-
-            {
-                pairs.Add(new Pair(sortedPoints[l], sortedPoints[l + 1]));
-            }
-
-            return pairs;
+            return false;
         }
 
-        private List<string> BuildCssClasses(Pair pair, int groupNo)
+
+        public List<string> GetClasses(int groupNo, int wordNumber)
         {
             var classes = new List<string>();
             foreach (var highlight in Highlights[groupNo])
             {
-                var annDetails = AnnotationData[highlight.AnnotationId];
-                var typeInitial = HighlightInitials[annDetails.Type];
-                if (annDetails.Type == HighlightType.Bracket)
+                
+                if (highlight.WordNumber == wordNumber)
                 {
-                    // ends at the end of this <span> 
-                    if (highlight.End == pair.End)
+                    var className = GetClassName(highlight.AnnotationId);
+                    if (AnnotationData[highlight.AnnotationId].Type == HighlightType.Bracket)
                     {
-                        classes.Add($"ann{typeInitial}{AnnotationData[highlight.AnnotationId].Colour}End");
+                        int prevGroup, prevWord, nextGroup, nextWord;
+                        switch (wordNumber)
+                        {
+                            case 0 when groupNo == 0:
+                                prevGroup = 0;
+                                prevWord = -1; // there is no word before this one (in this section)
+                                break;
+                            case 0:
+                                prevWord = Groups[groupNo - 1].Data.Count - 1;
+                                prevGroup = groupNo - 1;
+                                break;
+                            default:
+                                prevGroup = groupNo;
+                                prevWord = wordNumber - 1;
+                                break;
+                        }
+
+                        var maxWords = Groups[groupNo].Data.Count;
+                        switch (maxWords - wordNumber)
+                        {
+                            case 1 when groupNo == Groups.Count - 1:
+                                nextGroup = groupNo;
+                                nextWord = -1; // there is no word after this one (in this section)
+                                break;
+                            case 1:
+                                nextWord = 0;
+                                nextGroup = groupNo + 1;
+                                break;
+                            default:
+                                nextGroup = groupNo;
+                                nextWord = wordNumber + 1;
+                                break;
+                        }
+
+                        var isNextHighlighted = IsWordHighlighted(nextGroup, nextWord, highlight.AnnotationId);
+                        var isPrevHighlighted = IsWordHighlighted(prevGroup, prevWord, highlight.AnnotationId);
+
+                        // ends at the end of this <span> 
+                        if (!isNextHighlighted)
+                        {
+                            className += "End";
+                        }
+
+                        // starts at the start of this <span> 
+                        if (!isPrevHighlighted)
+                        {
+                            className += "Start";
+                        }
+
+                        // goes straight through this <span>
+                        if (isPrevHighlighted && isNextHighlighted)
+                        {
+                            className += "Middle";
+                        }
                     }
 
-                    // starts at the start of this <span> 
-                    if (highlight.Start == pair.Start)
-                    {
-                        classes.Add($"ann{typeInitial}{AnnotationData[highlight.AnnotationId].Colour}Start");
-                    }
 
-                    // goes straight through this <span>
-                    if (highlight.Start < pair.Start && highlight.End > pair.End)
-                    {
-                        classes.Add($"ann{typeInitial}{AnnotationData[highlight.AnnotationId].Colour}Middle");
-                    }
-                }
-                else
-                {
-                    // any relation at all to this span
-                    if (highlight.End == pair.End || highlight.Start == pair.Start ||
-                        highlight.Start < pair.Start && highlight.End > pair.End)
-                    {
-                        classes.Add($"ann{typeInitial}{AnnotationData[highlight.AnnotationId].Colour}");
-                    }
+                        classes.Add(className);
+                    
                 }
 
                 // 
@@ -213,14 +226,23 @@ namespace server.Pages.Annotate
             return classes;
         }
 
-        private List<int> GetAnnotationIds(Pair pair, int groupNo)
+        public string GetClassName(int annId)
+        {
+            var annDetails = AnnotationData[annId];
+            var typeInitial = HighlightInitials[annDetails.Type];
+            var className = $"ann{typeInitial}{annDetails.Colour}";
+            return className;
+        }
+        
+
+
+        public List<int> GetAnnotationIds(int groupNo, int character)
         {
             var ids = new List<int>();
             foreach (var highlight in Highlights[groupNo])
             {
                 // any relation at all to this span
-                if (highlight.End == pair.End || highlight.Start == pair.Start ||
-                    highlight.Start < pair.Start && highlight.End > pair.End)
+                if (highlight.WordNumber == character)
                 {
                     ids.Add(highlight.AnnotationId);
                 }
@@ -229,34 +251,19 @@ namespace server.Pages.Annotate
             return ids;
         }
 
-        private GroupData HighlightGroup(int groupNo)
-        {
-            var pairs = FindSplittingPairs(groupNo);
-
-
-            var result = new GroupData();
-            foreach (var pair in pairs)
-            {
-                result.Add(new PairWithData(pair, BuildCssClasses(pair, groupNo), GetAnnotationIds(pair, groupNo)));
-            }
-
-            return result;
-        }
 
         public void Run()
         {
             GenerateHighlightData();
             SimplifyHighlights();
-            for (int i = 0; i < Groups.Count; i++)
-            {
-                TransformedData.Add(HighlightGroup(i));
-            }
+
         }
 
         public string GetColourName(int annotationId)
         {
             var annData = AnnotationData[annotationId];
-            return Colours[annData.Type][annotationId];
+
+            return Colours[annData.Type][annData.Colour];
         }
     }
 }

@@ -1,14 +1,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using DocumentAnnotation.Extensions;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using server.Extensions;
-using server.Models;
 
-namespace server.Pages.Account
+namespace DocumentAnnotation.Pages.Account
 {
     public class LoginWith2faModel : PageModel
     {
@@ -88,6 +88,6 @@ namespace server.Pages.Account
             _logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", user.Id);
             ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
             return Page();
-        }  
+        }
     }
 }

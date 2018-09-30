@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Serilog;
 using Serilog.Events;
 
-namespace server
+namespace DocumentAnnotation
 {
     public class Program
     {

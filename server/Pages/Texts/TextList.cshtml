@@ -1,19 +1,21 @@
-﻿@model Texts.IndexModel
+﻿@using DocumentAnnotation.Pages.Texts
+@model DocumentAnnotation.Pages.Texts.IndexModel
 
 <table class="table">
     <thead>
-        <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Text[0].Title)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Text[0].Abbreviation)
-                </th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Text[0].Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Text[0].Abbreviation)
+        </th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Text) {
+    @foreach (var item in Model.Text)
+    {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
@@ -22,12 +24,12 @@
                 @Html.DisplayFor(modelItem => item.Abbreviation)
             </td>
             <td>
-                <a asp-page="./View/Index" asp-route-textIdentifier="@item.Identifier">View</a> |
-                <a asp-page="./Edit" asp-route-id="@item.TextId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.TextId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.TextId">Delete</a>
+                <a asp-page="/Texts/View/Index" asp-route-textIdentifier="@item.Identifier">View</a> |
+                <a asp-page="/Texts/Edit" asp-route-id="@item.TextId">Edit</a> |
+                <a asp-page="/Texts/Details" asp-route-id="@item.TextId">Details</a> |
+                <a asp-page="/Texts/Delete" asp-route-id="@item.TextId">Delete</a>
             </td>
         </tr>
-}
+    }
     </tbody>
 </table>

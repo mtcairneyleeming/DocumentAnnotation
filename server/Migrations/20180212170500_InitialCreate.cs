@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace server.Migrations
+namespace DocumentAnnotation.Migrations
 {
     public partial class InitialCreate : Migration
     {
@@ -16,10 +17,7 @@ namespace server.Migrations
                     TextId = table.Column<int>(nullable: false),
                     UserId = table.Column<string>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DocumentAnnotations", x => x.DocumentAnnotationId);
-                });
+                constraints: table => { table.PrimaryKey("PK_DocumentAnnotations", x => x.DocumentAnnotationId); });
 
             migrationBuilder.CreateTable(
                 name: "Texts",
@@ -30,10 +28,7 @@ namespace server.Migrations
                     Abbreviation = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Texts", x => x.TextId);
-                });
+                constraints: table => { table.PrimaryKey("PK_Texts", x => x.TextId); });
 
             migrationBuilder.CreateTable(
                 name: "Annotations",

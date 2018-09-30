@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace server.Migrations
+namespace DocumentAnnotation.Migrations
 {
     public partial class LocationIDRemoval : Migration
     {

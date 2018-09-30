@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace server.Pages.Account.Manage
+namespace DocumentAnnotation.Pages.Account.Manage
 {
     public class ShowRecoveryCodesModel : PageModel
     {
@@ -9,7 +9,7 @@ namespace server.Pages.Account.Manage
 
         public IActionResult OnGet()
         {
-            RecoveryCodes = (string[])TempData["RecoveryCodes"];
+            RecoveryCodes = (string[]) TempData["RecoveryCodes"];
             if (RecoveryCodes == null)
             {
                 return RedirectToPage("TwoFactorAuthentication");
