@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using server.Models;
 
-namespace server.Pages.Texts
+namespace DocumentAnnotation.Pages.Texts
 {
     public class CreateModel : PageModel
     {

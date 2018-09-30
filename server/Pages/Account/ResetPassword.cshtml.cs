@@ -1,12 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using server.Models;
 
-namespace server.Pages.Account
+namespace DocumentAnnotation.Pages.Account
 {
     public class ResetPasswordModel : PageModel
     {
@@ -77,6 +77,7 @@ namespace server.Pages.Account
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+
             return Page();
         }
     }

@@ -1,15 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using DocumentAnnotation.Extensions;
+using DocumentAnnotation.Models;
+using DocumentAnnotation.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
-using server.Extensions;
-using server.Models;
-using server.Services;
+using Microsoft.Extensions.Options;
 
-namespace server.Pages.Account
+namespace DocumentAnnotation.Pages.Account
 {
     [AllowAnonymous]
     public class RegisterModel : PageModel
@@ -18,17 +20,20 @@ namespace server.Pages.Account
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IOptions<Config> _config;
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ILogger<LoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IOptions<Config> config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _config = config;
         }
 
         [BindProperty]
@@ -38,6 +43,10 @@ namespace server.Pages.Account
 
         public class InputModel
         {
+            [Required]
+            [Display(Name = "Your invite code")]
+            public string Code { get; set; }
+            
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -65,7 +74,11 @@ namespace server.Pages.Account
             ReturnUrl = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new AppUser { UserName = Input.Email, Email = Input.Email };
+                if (Input.Code != _config.Value.InvitationCode)
+                {
+                    ModelState.AddModelError(string.Empty, "You must have the correct invitation code");
+                }
+                var user = new AppUser {UserName = Input.Email, Email = Input.Email};
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
@@ -78,6 +91,7 @@ namespace server.Pages.Account
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(Url.GetLocalUrl(returnUrl));
                 }
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);

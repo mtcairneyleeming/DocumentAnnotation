@@ -1,11 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using server.Models;
 
-namespace server.Pages.Account
+namespace DocumentAnnotation.Pages.Account
 {
     public class ConfirmEmailModel : PageModel
     {

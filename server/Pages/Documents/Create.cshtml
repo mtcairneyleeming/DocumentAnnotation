@@ -1,15 +1,14 @@
 @page
-@using Models
-@model Documents.CreateModel
+@using DocumentAnnotation.Models
+@using DocumentAnnotation.Pages.Documents
+@model global::DocumentAnnotation.Pages.Documents.CreateModel
 
 @{
     ViewData["Title"] = "Create";
+    ViewData["PageTitle"] = "Create a document:";
+    ViewData["PageSubtitle"] = "";
 }
 
-<h2>Create</h2>
-
-<h4>DocumentAnnotation</h4>
-<hr/>
 <div class="row">
     <div class="col-md-4">
         <form method="post">
@@ -17,30 +16,31 @@
 
 
             <div class="form-group">
-                <label asp-for="DocumentAnnotation.TextId" class="control-label"></label>
+                <label asp-for="DocumentAnnotation.TextId" class="control-label">Text</label>
                 <select class="form-control" asp-for="DocumentAnnotation.TextId" asp-items="@(new SelectList(Model.Texts, nameof(TextData.TextId), nameof(TextData.Title)))">
-                    <option>Please select one</option>
+                    <option>Please choose a text</option>
                 </select>
+                <small id="textHelpBlock" class="form-text text-muted">
+                   Select the text you would like to annotate in this document - if the text you want isn't on the list, ask Max!
+                </small>
                 <span asp-validation-for="DocumentAnnotation.TextId" class="text-danger"></span>
             </div>
 
 
             <div class="form-group">
-                <label asp-for="DocumentAnnotation.Name" class="control-label"></label>
+                <label asp-for="DocumentAnnotation.Name" class="control-label">Document Name</label>
                 <input asp-for="DocumentAnnotation.Name" class="form-control"/>
                 <span asp-validation-for="DocumentAnnotation.Name" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-default"/>
+                <input type="submit" value="Create" class="btn btn-primary"/>
+                <a asp-page="Index" class="btn btn-outline-danger">Cancel</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-page="Index">Back to List</a>
-</div>
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }

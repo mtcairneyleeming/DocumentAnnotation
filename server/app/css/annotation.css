@@ -1,0 +1,175 @@
+/* Multiple highlight styles are used so that annotations are distinguishable - those below are hardcoded, and 
+   annotations are assigned a style
+   */
+@media (min-width: 1200px) {
+    #foregroundContainer {
+        display: grid;
+        grid-template-columns: minmax(auto, 0.5fr) 1fr;
+        grid-template-areas: "document annotation";
+    }
+}
+
+@media (max-width: 1199px) {
+    #foregroundContainer {
+        display: block;
+    }
+}
+
+#document {
+    grid-area: document;
+}
+
+#annotationContainer {
+    grid-area: annotation;
+}
+
+.group > * {
+    font-size: 1rem;
+    line-height: 3rem;
+    white-space: normal;
+}
+
+.group {
+    font-size: 0;
+}
+
+.group span { /*white-space: pre-wrap;*/
+}
+
+#title {
+    z-index: 20;
+    position: relative;
+}
+
+/* Underlines:*/
+
+.annU1 {
+    line-height: 20px;
+    background: linear-gradient(0deg, #008000 2px, white 1px, transparent 1px) 0 100%;
+}
+
+.annU2 {
+    line-height: 24px;
+    background: linear-gradient(0deg, #0000ff 2px, white 1px, transparent 1px) 0 100%;
+    padding-bottom: 4px;
+}
+
+.annU3 {
+    line-height: 28px;
+    background: linear-gradient(0deg, #ff0000 2px, white 1px, transparent 1px) 0 100%;
+    padding-bottom: 8px;
+}
+
+.annU4 {
+    line-height: 32px;
+    background: linear-gradient(0deg, #9370db 2px, white 1px, transparent 1px) 0 100%;
+    padding-bottom: 12px;
+}
+
+/* Highlights: */
+
+/* Used only for new annotations*/
+.annH1 {
+    background-color: #ffff00 !important;
+}
+
+.annH2 {
+    background-color: #48CCC9;
+}
+
+.annH3 {
+    background-color: #FFA858;
+}
+
+.annH4 {
+    background-color: #74FFAD;
+}
+
+.annH5 {
+    background-color: #FF8CAC;
+}
+
+.annH6 {
+    background-color: #CC54B1;
+}
+
+/* Brackets: */
+
+.annB1Start:before { /* show brackets on end elements, and on start elements. On hover, show a highlight*/
+    border-left: 4px solid #666;
+    border-top: 4px solid #666;
+    border-bottom: 4px solid #666;
+    content: " ";
+    padding: 5px 4px 5px 0;
+}
+
+.annB1Middle:hover, .annB1Start:hover, .annB1End:hover {
+    border-top: 4px solid #666;
+    border-bottom: 4px solid #666;
+    padding: 5px 0 5px 0;
+}
+
+.annB1End:after {
+    border-right: 4px solid #666;
+    border-top: 4px solid #666;
+    border-bottom: 4px solid #666;
+    content: " ";
+    margin-right: 4px;
+    margin-left: -4px;
+    padding: 5px 0 5px 4px;
+}
+
+.annB2Start:before { /* show brackets on end elements, and on start elements. On hover, show a highlight*/
+    border-left: 4px solid #666;
+    border-top: 4px solid #666;
+    border-bottom: 4px solid #666;
+    border-radius: 10px 0 0 10px;
+    content: " ";
+    padding: 5px 4px 5px 0;
+}
+
+.annB2Middle:hover, .annB2Start:hover, .annB2End:hover {
+    border-top: 4px solid #666;
+    border-bottom: 4px solid #666;
+    padding: 5px 0 5px 0;
+}
+
+.annB2Start:hover {
+    border-radius: 10px 0 0 10px;
+}
+
+.annB2End:hover {
+    border-radius: 0 10px 10px 0;
+}
+
+.annB2End:after {
+    border-right: 4px solid #666;
+    border-top: 4px solid #666;
+    border-bottom: 4px solid #666;
+    border-radius: 0 10px 10px 0;
+    content: " ";
+    margin-right: 4px;
+    padding: 5px 0 5px 4px;
+    margin-left: -4px;
+}
+
+/* Styling to draw lines between highlights and the text associated*/
+
+#container {
+    position: relative;
+    margin: 10px;
+}
+
+#backgroundContainer {
+    position: absolute;
+    left: -15px; /* bootstrap things*/
+    z-index: 100;
+    pointer-events: none;
+    top: 0px; /*required to put the canvas behind stuff - I don't know why????????*/
+}
+
+#foregroundContainer {
+    position: relative;
+    width: 100%;
+    z-index: 10;
+}

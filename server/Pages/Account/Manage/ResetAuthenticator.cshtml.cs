@@ -1,12 +1,12 @@
 using System;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using server.Models;
 
-namespace server.Pages.Account.Manage
+namespace DocumentAnnotation.Pages.Account.Manage
 {
     public class ResetAuthenticatorModel : PageModel
     {
@@ -20,6 +20,7 @@ namespace server.Pages.Account.Manage
             _userManager = userManager;
             _logger = logger;
         }
+
         public async Task<IActionResult> OnGet()
         {
             var user = await _userManager.GetUserAsync(User);

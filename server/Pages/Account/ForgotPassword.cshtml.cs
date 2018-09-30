@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using DocumentAnnotation.Extensions;
+using DocumentAnnotation.Models;
+using DocumentAnnotation.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using server.Extensions;
-using server.Models;
-using server.Services;
 
-namespace server.Pages.Account
+namespace DocumentAnnotation.Pages.Account
 {
     public class ForgotPasswordModel : PageModel
     {

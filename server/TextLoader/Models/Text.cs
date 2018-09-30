@@ -1,7 +1,6 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace server.TextLoader.Models
+namespace DocumentAnnotation.TextLoader.Models
 {
     /// <summary>
     /// Represents an entire text, such as Cicero's Orationes
@@ -12,6 +11,7 @@ namespace server.TextLoader.Models
         /// Identifier for the text in the Database
         /// </summary>
         public string Identifier { get; set; }
+
         public string Name { get; set; }
         public List<Book> Books { get; set; } = new List<Book>();
     }
@@ -40,14 +40,15 @@ namespace server.TextLoader.Models
     public class Group
     {
         public string Name { get; set; }
+
         /// <summary>
         /// contains all text within this group
         /// </summary>
-        public string Data { get; set; }
+        public List<string> Data { get; set; }
+
         /// <summary>
         /// Set to true if text should not organically continue after this group - e.g. true for verse, but false for everything else.
         /// </summary>
         public bool AddNewLine { get; set; }
     }
-    
 }

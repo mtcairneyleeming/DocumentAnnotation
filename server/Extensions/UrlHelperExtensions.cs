@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace server.Extensions
+namespace DocumentAnnotation.Extensions
 {
     public static class UrlHelperExtensions
     {
@@ -19,7 +19,7 @@ namespace server.Extensions
             return urlHelper.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
-                values: new { userId, code },
+                values: new {userId, code},
                 protocol: scheme);
         }
 
@@ -28,7 +28,7 @@ namespace server.Extensions
             return urlHelper.Page(
                 "/Account/ResetPassword",
                 pageHandler: null,
-                values: new { userId, code },
+                values: new {userId, code},
                 protocol: scheme);
         }
     }

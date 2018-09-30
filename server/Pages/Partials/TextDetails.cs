@@ -1,6 +1,6 @@
-﻿using server.Models;
+﻿using DocumentAnnotation.Models;
 
-namespace server
+namespace DocumentAnnotation.Pages.Partials
 {
     public class TextDetails
     {

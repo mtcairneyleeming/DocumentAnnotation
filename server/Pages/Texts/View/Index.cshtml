@@ -1,29 +1,30 @@
 ﻿@page
-@using Extensions
-@model Texts.Citation.IndexModel
+@using DocumentAnnotation.Extensions
+@using DocumentAnnotation.Pages.Partials
+@using DocumentAnnotation.Pages.Texts.View
+@using Serilog
+@model DocumentAnnotation.Pages.Texts.View.IndexModel
 
 @{
     ViewData["Title"] = Model.TextData.Title + ", " + Model.TextData.Author;
 }
 
-@section Scripts
-{
-    <script>
-    textNames = @JavaScriptConvert.SerializeObject(Model._loader.CloneNames(Model.FullText.Identifier));
-    bookId = "@Model.Book.Name";
-    sectionId = "@Model.Section.Name";
-    
-    $(window).on('load',
-        function() {
-            initialiseSelects(textNames, bookId);
-        });
-    </script>
+@section Styles {
+    @await Html.WebpackStylesAsync("page-text-view")
+}
+
+@section Scripts {
+    @await Html.WebpackScriptsAsync("page-text-view")
+    @Html.JsonDataBlock("text-names", Model._loader.CloneNames(Model.FullText.Identifier))
+    @Html.JsonDataBlock("info", new
+    {
+        bookId = Model.Book.Name,
+        sectionId = Model.Section.Name,
+    })
 
 }
 
 <h2>@(Model.TextData.Title + ", " + Model.TextData.Author)</h2>
-
-
 
 
 <div class="row">
@@ -34,7 +35,7 @@
         <p>
             @foreach (var group in Model.Section.Groups)
             {
-                <span>@(group.Data + (group.AddNewLine ? "\n" : ""))</span>
+                <span class="group">@(string.Join(" ", group.Data) + (group.AddNewLine ? "\n" : ""))</span>
             }
         </p>
     </div>

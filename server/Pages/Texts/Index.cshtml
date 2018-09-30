@@ -1,5 +1,6 @@
 @page
-@model Texts.IndexModel
+@using DocumentAnnotation.Pages.Texts
+@model DocumentAnnotation.Pages.Texts.IndexModel
 
 
 @{
@@ -11,4 +12,4 @@
 <p>
     <a asp-page="Create">Create New</a>
 </p>
-@Html.Partial("Texts/TextList", Model)
+@await Html.PartialAsync("Texts/TextList", Model)

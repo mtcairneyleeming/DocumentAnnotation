@@ -1,36 +1,26 @@
 @page
-@model Documents.EditModel
+@using DocumentAnnotation.Models
+@using DocumentAnnotation.Pages.Documents
+@model global::DocumentAnnotation.Pages.Documents.EditModel
 
 @{
     ViewData["Title"] = "Edit";
+    ViewData["PageTitle"] = "Edit";
 }
 
-<h2>Edit</h2>
 
-<h4>DocumentAnnotation</h4>
-<hr />
 <div class="row">
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="DocumentAnnotation.DocumentAnnotationId" />
-            <div class="form-group">
-                <label asp-for="DocumentAnnotation.TextId" class="control-label"></label>
-                <input asp-for="DocumentAnnotation.TextId" class="form-control" />
-                <span asp-validation-for="DocumentAnnotation.TextId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DocumentAnnotation.UserId" class="control-label"></label>
-                <input asp-for="DocumentAnnotation.UserId" class="form-control" />
-                <span asp-validation-for="DocumentAnnotation.UserId" class="text-danger"></span>
-            </div>
+            <input type="hidden" asp-for="DocumentAnnotation.DocumentAnnotationId"/>
             <div class="form-group">
                 <label asp-for="DocumentAnnotation.Name" class="control-label"></label>
-                <input asp-for="DocumentAnnotation.Name" class="form-control" />
+                <input asp-for="DocumentAnnotation.Name" class="form-control"/>
                 <span asp-validation-for="DocumentAnnotation.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
+                <input type="submit" value="Save" class="btn btn-default"/>
             </div>
         </form>
     </div>
@@ -41,5 +31,5 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

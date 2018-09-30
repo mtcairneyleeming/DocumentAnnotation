@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using server.Models;
 
-namespace server.Pages.Texts
+namespace DocumentAnnotation.Pages.Texts
 {
     public class DetailsModel : PageModel
     {
@@ -13,10 +13,10 @@ namespace server.Pages.Texts
         public DetailsModel(AnnotationContext context)
         {
             _context = context;
-            
         }
 
         public TextData Text { get; set; }
+
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -30,7 +30,7 @@ namespace server.Pages.Texts
             {
                 return NotFound();
             }
-            
+
             return Page();
         }
     }

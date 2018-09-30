@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DocumentAnnotation.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using server.Models;
 
-namespace server.Pages
+namespace DocumentAnnotation.Pages
 {
     [AllowAnonymous]
     public class IndexModel : PageModel

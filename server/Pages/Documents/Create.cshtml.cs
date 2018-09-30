@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using server.Models;
 
-namespace server.Pages.Documents
+namespace DocumentAnnotation.Pages.Documents
 {
     public class CreateModel : PageModel
     {
@@ -23,15 +23,16 @@ namespace server.Pages.Documents
         {
             // load texts for select dropdown
             Texts = _context.Texts.ToList();
-               
-            
+
+
             return Page();
-            
         }
 
         [BindProperty]
-        public DocumentAnnotation DocumentAnnotation { get; set; }
+        public Models.DocumentAnnotation DocumentAnnotation { get; set; }
+
         public IList<TextData> Texts { get; set; }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

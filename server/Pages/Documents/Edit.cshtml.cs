@@ -1,11 +1,11 @@
 using System.Linq;
 using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using server.Models;
 
-namespace server.Pages.Documents
+namespace DocumentAnnotation.Pages.Documents
 {
     public class EditModel : PageModel
     {
@@ -17,7 +17,7 @@ namespace server.Pages.Documents
         }
 
         [BindProperty]
-        public DocumentAnnotation DocumentAnnotation { get; set; }
+        public Models.DocumentAnnotation DocumentAnnotation { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -32,6 +32,7 @@ namespace server.Pages.Documents
             {
                 return NotFound();
             }
+
             return Page();
         }
 

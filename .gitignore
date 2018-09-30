@@ -300,3 +300,11 @@ __pycache__/
 
 # NuGet packages folder
 packages
+/server/appsettings.json
+OriginalTexts
+ProcessedTexts
+assets
+css
+css
+js
+Generated

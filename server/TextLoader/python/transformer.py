@@ -1,7 +1,7 @@
 import gzip
 import json
 from typing import List
-
+import re
 from lxml import etree
 
 
@@ -64,15 +64,23 @@ class Transformer:
         # return first - hopefully the best way to do this automatically? TODO: find a better solution!
         self.milestones = hierarchies[0].split(":")
 
-    def add_text(self, el, use_text=True):
+    def add_text(self, el, use_text=True, use_name=False):
+        group = {}
+        if use_name:
+            group["Name"] = el.get("n")
+        group["AddNewLine"] =  self.use_new_line
+
         if el.text or el.tail:
             text = ""
             if el.text and use_text:
                 text += el.text
             if el.tail:
                 text += el.tail
-            text = " ".join(text.split())
-            self.processed_groups.append({"Data": text, "AddNewLine": self.use_new_line})
+            # text = " ".join(text.split())
+            # text += " "
+            # #text = re.compile(r'\W+').sub(' ', text)
+            group["Data"] = text.split()# re.split(r"(\s+)", text)
+        self.processed_groups.append(group)
 
     def fix_names(self):
         """Go through the books and sections, and if when parsed as integers, the names of sections do not
@@ -112,7 +120,6 @@ class Transformer:
         self.processed_sections = []
         self.current_book = {"Name": new_name, "Sections": []}
 
-
     def save_section(self, new_name):
         if self.current_section.get("Name") != "" and len(self.processed_groups) > 0:
             # add previous section to list
@@ -121,7 +128,6 @@ class Transformer:
         # start new section
         self.processed_groups = []
         self.current_section = {"Name": new_name, "Groups": []}
-
 
     def analyse_element(self, el: etree.Element):
         if el.tag == "text" or (el.tag == "div1" and el.get("type").lower() == self.milestones[0]):
@@ -140,12 +146,10 @@ class Transformer:
         # as far as I can tell, the '3rd milestone', a group, never actually shows up in a citation hint, so it must
         # be artificially put together. I.e., for verse, split on <l> elements, for prose, split on elements.
         elif el.tag == "l":  # group, specifically for verse
-            self.processed_groups.append(
-                {"Name": el.get("n"), "Data": etree.tostring(el, method="text", encoding='UTF-8').decode('utf-8'),
-                 "AddNewLine": self.use_new_line})
+            self.add_text(el, True, True)
         else:  # some other kind of element, most likely a emphasis or person name
-            if el.tag == "head":  # for the head, add a pointless title
-                return;
+            if el.tag == "head":  # adds a pointless extra title at the start of the document, so we ignore it
+                return
             if el.tag == "note" or el.tag == "hi" :  # pass on these, as notes just repeat the
                 # text already seen
                 self.add_text(el, False)
@@ -173,10 +177,9 @@ class Transformer:
         self.analyse_element(text_root)
 
         # tidy up loose ends - the last book/etc has to be added, as there will still be data to add, as there is no
-        # final element
+        # final element (NB. the section and book named Finished x are not added to the output
         self.save_section("Finished sections")
         self.save_book("Finished books")
-
 
         self.fix_names()
 

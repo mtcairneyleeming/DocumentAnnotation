@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 
-namespace server.Models
+namespace DocumentAnnotation.Models
 {
     public class Location : IComparable<Location>, IComparable
     {
-        public Location(int bookNumber, int sectionNumber, int groupNumber, int character)
+        public Location(int bookNumber, int sectionNumber, int groupNumber, int wordNumber)
         {
             BookNumber = bookNumber;
             SectionNumber = sectionNumber;
             GroupNumber = groupNumber;
-            Character = character;
+            WordNumber = wordNumber;
         }
 
         public Location()
@@ -27,7 +27,12 @@ namespace server.Models
             if (sectionNumberComparison != 0) return sectionNumberComparison;
             var groupNumberComparison = GroupNumber.CompareTo(other.GroupNumber);
             if (groupNumberComparison != 0) return groupNumberComparison;
-            return Character.CompareTo(other.Character);
+            return WordNumber.CompareTo(other.WordNumber);
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(BookNumber)}: {BookNumber}, {nameof(SectionNumber)}: {SectionNumber}, {nameof(GroupNumber)}: {GroupNumber}, {nameof(WordNumber)}: {WordNumber}";
         }
 
         public int CompareTo(object obj)
@@ -58,11 +63,9 @@ namespace server.Models
             return Comparer<Location>.Default.Compare(left, right) >= 0;
         }
 
-        public int BookNumber {get;set;}
-        public int SectionNumber {get;set;}
+        public int BookNumber { get; set; }
+        public int SectionNumber { get; set; }
         public int GroupNumber { get; set; }
-        public int Character {get;set;}
-
-       
+        public int WordNumber { get; set; }
     }
 }
