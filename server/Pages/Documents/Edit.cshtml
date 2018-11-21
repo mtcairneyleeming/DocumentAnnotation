@@ -13,14 +13,37 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="DocumentAnnotation.DocumentAnnotationId"/>
+            <input type="hidden" asp-for="Document.DocumentId"/>
+            <input type="hidden" asp-for="Document.TextId"/>
+            <input type="hidden" asp-for="Document.UserId"/>
             <div class="form-group">
-                <label asp-for="DocumentAnnotation.Name" class="control-label"></label>
-                <input asp-for="DocumentAnnotation.Name" class="form-control"/>
-                <span asp-validation-for="DocumentAnnotation.Name" class="text-danger"></span>
+                <label asp-for="Document.Name" class="control-label">Document Name</label>
+                <input asp-for="Document.Name" class="form-control"/>
+                <span asp-validation-for="Document.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default"/>
+                <label asp-for="Document.Visibility" class="control-label">Sharing</label>
+                <select class="form-control" asp-for="Document.Visibility" asp-items="Html.GetEnumSelectList<DocumentVisibility>()">
+                </select>
+                <small class="form-text text-muted">
+                    Choose who you want to share this document with - you can choose from:
+                    1) private, only visible to you,
+                    2) limited, visible to the people you choose
+                    3) public, visible to anyone with the link
+                </small>
+                <span asp-validation-for="Document.Visibility" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AllowedUsers" class="control-label">Allowed users</label>
+                <input asp-for="AllowedUsers" class="form-control"/>
+                <small class="form-text text-muted">
+                    Provide the email addresses of the user you choose to allow to view this document, separated by commas.
+                </small>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary"/>
+                
+                <a class="btn btn-danger" asp-page="/Documents/Delete" asp-route-id="@Model.Document.DocumentId">Delete</a>
             </div>
         </form>
     </div>

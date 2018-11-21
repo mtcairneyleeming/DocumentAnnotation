@@ -15,7 +15,7 @@
 
 @section Scripts {
     @await Html.WebpackScriptsAsync("page-text-view")
-    @Html.JsonDataBlock("text-names", Model._loader.CloneNames(Model.FullText.Identifier))
+    @Html.JsonDataBlock("text-names", Model.Text.CloneNames())
     @Html.JsonDataBlock("info", new
     {
         bookId = Model.Book.Name,
@@ -32,12 +32,7 @@
 
         <h3>Book @Html.DisplayFor(m => m.Book.Name), Section @Html.DisplayFor(m => m.Section.Name)</h3>
         <hr/>
-        <p>
-            @foreach (var group in Model.Section.Groups)
-            {
-                <span class="group">@(string.Join(" ", group.Data) + (group.AddNewLine ? "\n" : ""))</span>
-            }
-        </p>
+        @await Html.PartialAsync("Partials/TextPartial", new TextPartial(Model.Groups, Model.TextData.AddNewLine))
     </div>
     <div class="col-md-4">
         @await Html.PartialAsync("Partials/TextNavigation")

@@ -22,7 +22,7 @@ namespace DocumentAnnotation.Controllers
         [HttpGet]
         public IEnumerable<Highlight> GetHighlights()
         {
-            return _context.Highlights.Where(h=> h.Annotation.DocumentAnnotation.UserId == GetCurrentUser());
+            return _context.Highlights.Where(h=> h.Annotation.Document.UserId == GetCurrentUser());
         }
 
 
@@ -37,7 +37,7 @@ namespace DocumentAnnotation.Controllers
             }
 
             var annIds = highlights.Select(h => h.AnnotationId);
-            var res = _context.Annotations.Where(a => annIds.Contains(a.AnnotationId)).All(a => a.DocumentAnnotation.UserId == GetCurrentUser());
+            var res = _context.Annotations.Where(a => annIds.Contains(a.AnnotationId)).All(a => a.Document.UserId == GetCurrentUser());
             if (!res)
             {
                 return Unauthorized();
@@ -56,7 +56,7 @@ namespace DocumentAnnotation.Controllers
                 return BadRequest(ModelState);
             }
             var annIds = highlights.Select(h => h.AnnotationId);
-            var res = _context.Annotations.Where(a => annIds.Contains(a.AnnotationId)).All(a => a.DocumentAnnotation.UserId == GetCurrentUser());
+            var res = _context.Annotations.Where(a => annIds.Contains(a.AnnotationId)).All(a => a.Document.UserId == GetCurrentUser());
             if (!res)
             {
                 return Unauthorized();

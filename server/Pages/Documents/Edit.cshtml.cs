@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +19,10 @@ namespace DocumentAnnotation.Pages.Documents
         }
 
         [BindProperty]
-        public Models.DocumentAnnotation DocumentAnnotation { get; set; }
+        public Document Document { get; set; }
+
+        [BindProperty]
+        public string AllowedUsers { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -26,12 +31,17 @@ namespace DocumentAnnotation.Pages.Documents
                 return NotFound();
             }
 
-            DocumentAnnotation = await _context.DocumentAnnotations.SingleOrDefaultAsync(m => m.DocumentAnnotationId == id);
+            Document = await _context.DocumentAnnotations.Include(da => da.User).SingleOrDefaultAsync(m => m.DocumentId == id &&
+                                                                                                           m.UserId == User
+                                                                                                               .FindFirst(ClaimTypes.NameIdentifier)
+                                                                                                               .Value);
 
-            if (DocumentAnnotation == null)
+            if (Document == null)
             {
                 return NotFound();
             }
+
+            AllowedUsers = string.Join(",", Document.AllowedUsers ?? new string[0]);
 
             return Page();
         }
@@ -43,28 +53,22 @@ namespace DocumentAnnotation.Pages.Documents
                 return Page();
             }
 
-            _context.Attach(DocumentAnnotation).State = EntityState.Modified;
+            if (!(AllowedUsers is null))
+                Document.AllowedUsers = AllowedUsers.Split(",").ToList().Select(a => a.Trim()).ToArray();
 
-            try
+            var test = _context.DocumentAnnotations.AsNoTracking().SingleOrDefault(m =>
+                m.DocumentId == Document.DocumentId &&
+                m.UserId == User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            if (test is null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DocumentAnnotationExists(DocumentAnnotation.DocumentAnnotationId))
-                {
-                    return NotFound();
-                }
 
-                throw;
-            }
+            _context.Attach(Document).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
 
             return RedirectToPage("./Index");
-        }
-
-        private bool DocumentAnnotationExists(int id)
-        {
-            return _context.DocumentAnnotations.Any(e => e.DocumentAnnotationId == id);
         }
     }
 }

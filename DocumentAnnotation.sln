@@ -15,6 +15,7 @@ Global
 		{C128FE2B-2125-4C6D-ADDC-FAC5FC366078}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C128FE2B-2125-4C6D-ADDC-FAC5FC366078}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C128FE2B-2125-4C6D-ADDC-FAC5FC366078}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C128FE2B-2125-4C6D-ADDC-FAC5FC366078}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

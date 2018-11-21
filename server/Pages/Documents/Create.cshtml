@@ -16,21 +16,21 @@
 
 
             <div class="form-group">
-                <label asp-for="DocumentAnnotation.TextId" class="control-label">Text</label>
-                <select class="form-control" asp-for="DocumentAnnotation.TextId" asp-items="@(new SelectList(Model.Texts, nameof(TextData.TextId), nameof(TextData.Title)))">
+                <label asp-for="Document.TextId" class="control-label">Text</label>
+                <select class="form-control" asp-for="Document.TextId" asp-items="@(new SelectList(Model.Texts, nameof(TextData.TextId), nameof(TextData.Title)))">
                     <option>Please choose a text</option>
                 </select>
                 <small id="textHelpBlock" class="form-text text-muted">
                    Select the text you would like to annotate in this document - if the text you want isn't on the list, ask Max!
                 </small>
-                <span asp-validation-for="DocumentAnnotation.TextId" class="text-danger"></span>
+                <span asp-validation-for="Document.TextId" class="text-danger"></span>
             </div>
 
 
             <div class="form-group">
-                <label asp-for="DocumentAnnotation.Name" class="control-label">Document Name</label>
-                <input asp-for="DocumentAnnotation.Name" class="form-control"/>
-                <span asp-validation-for="DocumentAnnotation.Name" class="text-danger"></span>
+                <label asp-for="Document.Name" class="control-label">Document Name</label>
+                <input asp-for="Document.Name" class="form-control"/>
+                <span asp-validation-for="Document.Name" class="text-danger"></span>
             </div>
 
             <div class="form-group">

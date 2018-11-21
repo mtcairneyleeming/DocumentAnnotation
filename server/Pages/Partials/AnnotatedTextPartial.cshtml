@@ -1,0 +1,26 @@
+@using DocumentAnnotation.Pages.Partials
+@model DocumentAnnotation.Pages.Partials.AnnotatedTextPartial
+
+
+
+<p id="document">
+    @for (var i = 0; i < Model.Groups.Count; i++)
+    {
+        var group = Model.Groups[i];
+        <span class="group" id="group@(i)"  data-name="@group.Name">
+            @*for each word in the group*@
+            @for (var j = 0; j < group.Data.Count; j++)
+            {
+                var ids = string.Join(",", Model.HighlightingByWord[i][j]);
+
+                <span id="@i-@j" data-ids=",@ids," class="word">@group.Data[j] </span>
+            }
+        </span>
+        if (Model.AddNewLine)
+        {
+            <br/>
+        }
+    }
+    <span class="group" id="group@(Model.Groups.Count)"></span>
+
+</p>

@@ -29,7 +29,7 @@
 
     <form method="post">
         <input type="hidden" asp-for="Text.TextId"/>
-        <input type="submit" value="Delete" class="btn btn-default"/> |
-        <a asp-page="./Index">Back to List</a>
+        <input type="submit" value="Delete" class="btn btn-danger"/>
+        <a class="btn btn-secondary" asp-page="/Documents/Edit" asp-route-id="@Model.Text.TextId">Cancel</a>
     </form>
 </div>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - DocumentAnnotation</title>
+    <title>@ViewData["Title"] - Annotations</title>
 
 
     @await Html.WebpackStylesAsync("page-common")
@@ -22,6 +22,7 @@
                     <h2>@ViewData["PageTitle"]</h2>
 
                     <h4>@ViewData["PageSubtitle"]</h4>
+                    <p class="">@ViewData["PageExtraText"]</p>
                     <hr/>
                 </div>
             }
@@ -32,7 +33,7 @@
         </div>
     </div>
 
-    <hr/>
+    <hr id="footer-hr"/>
     <footer>
         <p>&copy; 2018 Max Cairney-Leeming</p>
     </footer>
@@ -40,22 +41,6 @@
 
 
 @await Html.WebpackScriptsAsync("page-common")
-<script>
-    $(function() {
-        $("#reload-texts-button").click(function(e) {
-            e.preventDefault();
-            $.post("@Url.Action("Reload", "Reload")");
-            const icon = document.getElementById("reload-icon");
-            icon.classList.add("fa-spin");
-            setTimeout(() => {
-                    icon.classList.remove("fa-spin");
-                    window.location.reload();
-                },
-                510);
-
-        });
-    })
-</script>
 @RenderSection("Scripts", required: false)
 </body>
 </html>

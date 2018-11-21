@@ -21,7 +21,7 @@ namespace DocumentAnnotation.Migrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.0.1-rtm-125");
 
-            modelBuilder.Entity("DocumentAnnotation.Models.Annotation", b =>
+            modelBuilder.Entity("Document.Models.Annotation", b =>
                 {
                     b.Property<int>("AnnotationId")
                         .ValueGeneratedOnAdd();
@@ -39,7 +39,7 @@ namespace DocumentAnnotation.Migrations
                     b.ToTable("Annotations");
                 });
 
-            modelBuilder.Entity("DocumentAnnotation.Models.AppUser", b =>
+            modelBuilder.Entity("Document.Models.AppUser", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -89,7 +89,7 @@ namespace DocumentAnnotation.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("DocumentAnnotation.Models.DocumentAnnotation", b =>
+            modelBuilder.Entity("Document.Models.Document", b =>
                 {
                     b.Property<int>("DocumentAnnotationId")
                         .ValueGeneratedOnAdd();
@@ -109,7 +109,7 @@ namespace DocumentAnnotation.Migrations
                     b.ToTable("DocumentAnnotations");
                 });
 
-            modelBuilder.Entity("DocumentAnnotation.Models.Highlight", b =>
+            modelBuilder.Entity("Document.Models.Highlight", b =>
                 {
                     b.Property<int>("HighlightId")
                         .ValueGeneratedOnAdd();
@@ -123,7 +123,7 @@ namespace DocumentAnnotation.Migrations
                     b.ToTable("Highlights");
                 });
 
-            modelBuilder.Entity("DocumentAnnotation.Models.TextData", b =>
+            modelBuilder.Entity("Document.Models.TextData", b =>
                 {
                     b.Property<int>("TextId")
                         .ValueGeneratedOnAdd();
@@ -248,34 +248,34 @@ namespace DocumentAnnotation.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("DocumentAnnotation.Models.Annotation", b =>
+            modelBuilder.Entity("Document.Models.Annotation", b =>
                 {
-                    b.HasOne("DocumentAnnotation.Models.DocumentAnnotation", "DocumentAnnotation")
+                    b.HasOne("Document.Models.Document", "Document")
                         .WithMany("Annotations")
                         .HasForeignKey("DocumentAnnotationId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("DocumentAnnotation.Models.DocumentAnnotation", b =>
+            modelBuilder.Entity("Document.Models.Document", b =>
                 {
-                    b.HasOne("DocumentAnnotation.Models.TextData", "Text")
+                    b.HasOne("Document.Models.TextData", "Text")
                         .WithMany()
                         .HasForeignKey("TextId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("DocumentAnnotation.Models.AppUser", "User")
+                    b.HasOne("Document.Models.AppUser", "User")
                         .WithMany("DocumentAnnotations")
                         .HasForeignKey("UserId");
                 });
 
-            modelBuilder.Entity("DocumentAnnotation.Models.Highlight", b =>
+            modelBuilder.Entity("Document.Models.Highlight", b =>
                 {
-                    b.HasOne("DocumentAnnotation.Models.Annotation", "Annotation")
+                    b.HasOne("Document.Models.Annotation", "Annotation")
                         .WithMany("Highlights")
                         .HasForeignKey("AnnotationId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.OwnsOne("DocumentAnnotation.Models.Location", "End", b1 =>
+                    b.OwnsOne("Document.Models.Location", "End", b1 =>
                         {
                             b1.Property<int?>("HighlightId");
 
@@ -289,13 +289,13 @@ namespace DocumentAnnotation.Migrations
 
                             b1.ToTable("Highlights");
 
-                            b1.HasOne("DocumentAnnotation.Models.Highlight")
+                            b1.HasOne("Document.Models.Highlight")
                                 .WithOne("End")
-                                .HasForeignKey("DocumentAnnotation.Models.Location", "HighlightId")
+                                .HasForeignKey("Document.Models.Location", "HighlightId")
                                 .OnDelete(DeleteBehavior.Cascade);
                         });
 
-                    b.OwnsOne("DocumentAnnotation.Models.Location", "Start", b1 =>
+                    b.OwnsOne("Document.Models.Location", "Start", b1 =>
                         {
                             b1.Property<int>("HighlightId");
 
@@ -309,9 +309,9 @@ namespace DocumentAnnotation.Migrations
 
                             b1.ToTable("Highlights");
 
-                            b1.HasOne("DocumentAnnotation.Models.Highlight")
+                            b1.HasOne("Document.Models.Highlight")
                                 .WithOne("Start")
-                                .HasForeignKey("DocumentAnnotation.Models.Location", "HighlightId")
+                                .HasForeignKey("Document.Models.Location", "HighlightId")
                                 .OnDelete(DeleteBehavior.Cascade);
                         });
                 });
@@ -326,7 +326,7 @@ namespace DocumentAnnotation.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("DocumentAnnotation.Models.AppUser")
+                    b.HasOne("Document.Models.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -334,7 +334,7 @@ namespace DocumentAnnotation.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("DocumentAnnotation.Models.AppUser")
+                    b.HasOne("Document.Models.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -347,7 +347,7 @@ namespace DocumentAnnotation.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("DocumentAnnotation.Models.AppUser")
+                    b.HasOne("Document.Models.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -355,7 +355,7 @@ namespace DocumentAnnotation.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("DocumentAnnotation.Models.AppUser")
+                    b.HasOne("Document.Models.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);

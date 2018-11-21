@@ -1,4 +1,6 @@
-import { Text, Section, Book } from "./TextTypes"
+// noinspection JSMethodCanBeStatic
+
+import { Text} from "./TextTypes"
 
 export class SelectController {
     constructor(bookId: string, sectionId: string, textNames: Text) {
@@ -24,15 +26,13 @@ export class SelectController {
 
     private initialiseSelects() {
         SelectController.setSelectOptions("bookSelect", this.textNames.books.map(b => b.name), this.bookId);
-        SelectController.setSelectOptions("sectionSelect",
-            this.textNames.books.find(b => b.name === this.bookId).sections.map(s => s.name),
-            this.sectionId);
+        SelectController.setSelectOptions("sectionSelect", this.textNames.books.find(b => b.name === this.bookId).sections.map(s => s.name), this.sectionId);
     }
 
     updateBook() {
         // update the section dropdown
         const e = <HTMLSelectElement>document.getElementById("bookSelect");
-        let bookId = e.options[e.selectedIndex].value;
+        this.bookId = e.options[e.selectedIndex].value;
         this.initialiseSelects();
     }
 
@@ -52,7 +52,8 @@ export class SelectController {
         window.location.href = newUrl;
     }
 
-    static updateQueryStringParameter(uri, key, value) {
+
+    private static updateQueryStringParameter(uri, key, value) {
         const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
         const separator = uri.indexOf('?') !== -1 ? "&" : "?";
         if (uri.match(re)) {
@@ -62,7 +63,7 @@ export class SelectController {
         }
     }
 
-    static setSelectOptions(id, options, currentSelection) {
+    private static setSelectOptions(id, options, currentSelection) {
         let select = $(`#${id}`);
         select.empty();
         for (let i = 0; i < options.length; i++) {

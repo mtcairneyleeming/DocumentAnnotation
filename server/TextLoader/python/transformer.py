@@ -16,15 +16,14 @@ def int_try_parse(value):
 class Transformer:
     """Transforms TEI.2 xml documents from Perseus to a custom JSON format for simpler use with the C# server"""
 
-    def __init__(self, input_dir, output_dir, identifier, use_new_line):
+    def __init__(self, input_dir, output_dir, identifier):
         # where to load and save data
         self.input_dir = input_dir
         self.output_dir = output_dir
         # identifier of document to save & load
         self.identifier = identifier
 
-        # whether to use a new line between groups
-        self.use_new_line = use_new_line
+
         # the final data to save
         self.output = {}
 
@@ -68,7 +67,6 @@ class Transformer:
         group = {}
         if use_name:
             group["Name"] = el.get("n")
-        group["AddNewLine"] =  self.use_new_line
 
         if el.text or el.tail:
             text = ""

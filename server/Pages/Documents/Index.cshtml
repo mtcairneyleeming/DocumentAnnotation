@@ -9,6 +9,11 @@
 <h2>Index</h2>
 
 <p>
-    <a asp-page="Create">Create New</a>
+    <a asp-page="Create">Create a new document</a>
 </p>
-@await Html.PartialAsync("Documents/DocumentList", Model)
+@{
+    var docsModel = new global::DocumentAnnotation.Pages.Documents.DocumentListModel(Model._context, Model._userManager, Model.User);
+    await docsModel.OnGetAsync();
+}
+
+@await Html.PartialAsync("Documents/DocumentList", docsModel)

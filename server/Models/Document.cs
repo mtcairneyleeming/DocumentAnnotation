@@ -6,14 +6,18 @@ namespace DocumentAnnotation.Models
     /// <summary>
     /// A record that represents a user's annotation of a document, and multiple can exist for a document-user combination.
     /// </summary>
-    public class DocumentAnnotation
+    public class Document
     {
-        public int DocumentAnnotationId { get; set; }
+        public int DocumentId { get; set; }
 
         public int TextId { get; set; }
         public TextData Text { get; set; }
 
-
+        public Location LastLocation { get; set; }
+        public DocumentVisibility Visibility { get; set; }
+        // a list of the users allowed to view this document
+        public string[] AllowedUsers { get; set; }
+        
         public string UserId { get; set; }
 
         [ForeignKey("UserId")]

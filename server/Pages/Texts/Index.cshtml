@@ -8,8 +8,14 @@
 }
 
 <h2>Index</h2>
-
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-@await Html.PartialAsync("Texts/TextList", Model)
+@if (Model.User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-page="Create">Create New</a>
+    </p>
+}
+@{
+    var model = new TextListModel(Model._context, Model.User);
+    await model.OnGetAsync();
+}
+@await Html.PartialAsync("Texts/TextList", model)

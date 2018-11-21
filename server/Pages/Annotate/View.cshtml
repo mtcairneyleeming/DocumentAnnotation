@@ -1,0 +1,57 @@
+﻿@page
+
+@using DocumentAnnotation.Extensions
+@using DocumentAnnotation.Pages.Partials
+@model DocumentAnnotation.Pages.Annotate.ViewModel
+
+@{
+    ViewData["Title"] = $"Bk{Model.Book.Name}, Sec{Model.Section.Name}, {Model.TextData.Title} - {Model.DocAnn.Name}";
+    ViewData["PageTitle"] = $"{Model.DocAnn.Name}";
+    ViewData["PageSubtitle"] = $"Annotations on book {Model.Book.Name}, section {Model.Section.Name} of the {Model.TextData.Title}";
+}
+
+@section Styles {
+    @await Html.WebpackStylesAsync("page-annotate-view")
+}
+
+@section Scripts {
+    @await Html.WebpackScriptsAsync("page-annotate-view")
+    @Html.JsonDataBlock("annotations", Model.Annotator.Annotations)
+
+    @await Html.WebpackScriptsAsync("page-text-view")
+
+    @{
+        var cloneNames = Model.Text.CloneNames();
+    }
+    @Html.JsonDataBlock("text-names", cloneNames)
+    @Html.JsonDataBlock("info", new
+    {
+        bookId = Model.Book.Name,
+        bookNumber = Model.BookNum,
+        sectionId = Model.Section.Name,
+        sectionNumber = Model.SectionNum,
+        docAnnId = Model.DocAnn.DocumentId,
+        print = Model.Print
+    })
+}
+
+
+<div id="container-fluid">
+    <div id="foregroundContainer">
+        <div id="documentContainer">
+            @await Html.PartialAsync("Partials/AnnotatedTextPartial", new AnnotatedTextPartial(Model.Groups, Model.Annotator.GetIdsForAllWords(), Model.TextData.AddNewLine))
+            @await Html.PartialAsync("Partials/TextNavigation")
+        </div>
+        <div id="annotationContainer">
+            @await Html.PartialAsync("Partials/AnnotationTablePartial", new AnnotationTablePartial(Model.Annotator.Annotations, Model.Annotator.GetColoursForAllWords(), false))
+            <button class="btn btn-sm btn-secondary" id="colouredModeToggle">Toggle coloured mode</button>
+            <hr/>
+            @await Html.PartialAsync("Partials/TextDetails", new TextDetails(Model.TextData, Model.Book.Name, Model.Section.Name))
+        </div>
+
+    </div>
+</div>
+<div id="backgroundContainer">
+    @*Must stay, to hold the canvas for drawing*@
+</div>
+<div id="test"> </div>

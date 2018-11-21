@@ -17,21 +17,23 @@
         "@types/bootstrap": "^4.0.1",
         "@types/html-webpack-plugin": "^2.30.3",
         "@types/jquery": "^3.3.1",
+        "aspnet-webpack": "^3.0.0",
         "awesome-typescript-loader": "^5.0.0",
         "css-loader": "^0.28.11",
         "file-loader": "^1.1.11",
+        "hard-source-webpack-plugin": "^0.12.0",
         "html-webpack-plugin": "^3.2.0",
         "ts-node": "^5.0.1",
         "typescript": "^2.8.1",
         "uglifyjs-webpack-plugin": "^1.2.4",
         "webpack": "^4.5.0",
+        "webpack-clean-obsolete-chunks": "latest",
         "webpack-cli": "^2.0.14",
-        "aspnet-webpack": "^3.0.0",
-        "webpack-hot-middleware": "^2.22.2",
-        "webpack-dev-middleware":"^3.1.3"
+        "webpack-dev-middleware": "^3.1.3",
+        "webpack-hot-middleware": "^2.22.2"
     },
     "scripts": {
         "build": "webpack --progress -w --mode development",
-        "tsc-build": "tsc ./webpack.config.ts"
+        "build-once": "webpack"
     }
 }

@@ -29,7 +29,7 @@ namespace DocumentAnnotation.Pages.Documents
         }
 
         [BindProperty]
-        public Models.DocumentAnnotation DocumentAnnotation { get; set; }
+        public Models.Document Document { get; set; }
 
         public IList<TextData> Texts { get; set; }
 
@@ -39,9 +39,9 @@ namespace DocumentAnnotation.Pages.Documents
             {
                 return Page();
             }
-
-            DocumentAnnotation.User = await _userManager.GetUserAsync(User);
-            _context.DocumentAnnotations.Add(DocumentAnnotation);
+            Document.LastLocation = new Location(0, 0);
+            Document.User = await _userManager.GetUserAsync(User);
+            _context.DocumentAnnotations.Add(Document);
             await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

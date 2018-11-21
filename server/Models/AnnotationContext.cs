@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using DocumentAnnotation.Models;
 
 namespace DocumentAnnotation.Models
 {
@@ -8,7 +9,8 @@ namespace DocumentAnnotation.Models
         public DbSet<Annotation> Annotations { get; set; }
         public DbSet<Highlight> Highlights { get; set; }
         public DbSet<TextData> Texts { get; set; }
-        public DbSet<DocumentAnnotation> DocumentAnnotations { get; set; }
+        public DbSet<Document> DocumentAnnotations { get; set; }
+        public DbSet<LinkShortener> LinkShorteners { get; set; }
 
         public AnnotationContext()
         {
@@ -16,7 +18,6 @@ namespace DocumentAnnotation.Models
 
         public AnnotationContext(DbContextOptions options) : base(options)
         {
-            
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,7 +27,6 @@ namespace DocumentAnnotation.Models
             {
                 entity.OwnsOne(h => h.Location);
                 entity.Property(e => e.HighlightId).ValueGeneratedOnAdd();
-                
             });
             modelBuilder.Entity<Annotation>(entity =>
             {
@@ -35,6 +35,7 @@ namespace DocumentAnnotation.Models
                     .WithOne(e => e.Annotation)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<Document>(entity => { entity.OwnsOne(da => da.LastLocation); });
         }
     }
 }

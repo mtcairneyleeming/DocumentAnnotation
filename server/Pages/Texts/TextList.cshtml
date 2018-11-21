@@ -1,5 +1,5 @@
 ﻿@using DocumentAnnotation.Pages.Texts
-@model DocumentAnnotation.Pages.Texts.IndexModel
+@model DocumentAnnotation.Pages.Texts.TextListModel
 
 <table class="table">
     <thead>
@@ -24,10 +24,13 @@
                 @Html.DisplayFor(modelItem => item.Abbreviation)
             </td>
             <td>
-                <a asp-page="/Texts/View/Index" asp-route-textIdentifier="@item.Identifier">View</a> |
-                <a asp-page="/Texts/Edit" asp-route-id="@item.TextId">Edit</a> |
-                <a asp-page="/Texts/Details" asp-route-id="@item.TextId">Details</a> |
-                <a asp-page="/Texts/Delete" asp-route-id="@item.TextId">Delete</a>
+                <a asp-page="/Texts/View/Index" asp-route-textIdentifier="@item.Identifier">Read</a> |
+                @if (Model.CurrentUser.IsInRole("Admin"))
+                {
+                    <a asp-page="/Texts/Edit" asp-route-id="@item.TextId">Edit</a>
+                    <text> |</text>
+                }
+                <a asp-page="/Texts/Details" asp-route-id="@item.TextId">Details</a>
             </td>
         </tr>
     }

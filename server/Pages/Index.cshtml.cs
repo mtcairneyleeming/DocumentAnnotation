@@ -1,5 +1,6 @@
 ﻿using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace DocumentAnnotation.Pages
@@ -9,10 +10,13 @@ namespace DocumentAnnotation.Pages
     {
         public readonly AnnotationContext _context;
 
-        public IndexModel(AnnotationContext context)
+        public IndexModel(AnnotationContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            UserManager = userManager;
         }
+
+        public UserManager<AppUser> UserManager { get; set; }
 
         public void OnGet()
         {

@@ -19,9 +19,9 @@ namespace DocumentAnnotation.Models
         
         public List<Highlight> Highlights { get; set; }
 
-        public int DocumentAnnotationId { get; set; }
+        public int DocumentId { get; set; }
 
         [JsonIgnore]
-        public DocumentAnnotation DocumentAnnotation { get; set; }
+        public Document Document { get; set; }
     }
 }

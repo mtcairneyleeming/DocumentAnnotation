@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DocumentAnnotation.Models;
-using DocumentAnnotation.TextLoader.Models;
+using DocumentAnnotation.TextLoader;
 using Npgsql.TypeHandlers;
 
 namespace DocumentAnnotation.Annotator
@@ -10,10 +10,11 @@ namespace DocumentAnnotation.Annotator
     {
         public Annotator(List<Annotation> annotations, List<Group> groups)
         {
-            Annotations = annotations.Where(a=> a.Highlights.Count > 0).OrderBy(a=> a.Highlights[0].Location).ToList();
-            Annotations.AddRange(annotations.Where(a=> a.Highlights.Count == 0));
+            Annotations = annotations.Where(a => a.Highlights.Count > 0).OrderBy(a => a.Highlights.Last().Location).ToList();
+            Annotations.AddRange(annotations.Where(a => a.Highlights.Count == 0));
             Groups = groups;
-            Run();
+            GenerateHighlightData();
+            SimplifyHighlights();
         }
 
 
@@ -21,7 +22,6 @@ namespace DocumentAnnotation.Annotator
         public List<Annotation> Annotations { get; }
         private List<Group> Groups { get; }
 
-        
 
         // internal working 
         /// <summary>
@@ -35,36 +35,101 @@ namespace DocumentAnnotation.Annotator
                 {HighlightType.Highlight, "H"}
             };
 
-        private Dictionary<HighlightType, Dictionary<int, string>> Colours { get; } =
-            new Dictionary<HighlightType, Dictionary<int, string>>
+        private string[] UnderLineColours { get; } =
+        {
+            "#e6194B",
+            "#3cb44b",
+            "#ffe119",
+            "#4363d8",
+            "#f58231",
+            "#911eb4",
+            "#42d4f4",
+            "#f032e6",
+            "#7def00",
+            "#fabebe",
+            "#469990",
+            "#e6beff",
+            "#9A6324",
+            "#800000",
+        }; //14
+
+        private readonly string[] _highlightColours =
+        {
+            "#ff0000",
+            "#00ff00",
+            "#42d4f4",
+            "#9c70ff",
+            "#ff30de",
+            "#ff5e00"
+        }; //6
+
+        private readonly string[] _bracketColours =
+        {
+            "#000000",
+            "#000075",
+            "#800000",
+            "#911eb4"
+        }; //4
+
+
+        private readonly (HighlightType, int)[] _colourMap =
+        {
+            (HighlightType.Highlight, 0), //0
+            (HighlightType.Underline, 0),
+            (HighlightType.Underline, 1),
+            (HighlightType.Underline, 2), //3
+            (HighlightType.Highlight, 1),
+            (HighlightType.Bracket, 0),
+            (HighlightType.Underline, 3), //6
+            (HighlightType.Underline, 4),
+            (HighlightType.Highlight, 2),
+            (HighlightType.Bracket, 1), //9
+            (HighlightType.Underline, 5),
+            (HighlightType.Underline, 6),
+            (HighlightType.Highlight, 3), //12
+            (HighlightType.Bracket, 2),
+            (HighlightType.Underline, 7),
+            (HighlightType.Underline, 8), //15
+            (HighlightType.Highlight, 4),
+            (HighlightType.Underline, 9),
+            (HighlightType.Underline, 10), //18
+            (HighlightType.Bracket, 3),
+            (HighlightType.Highlight, 5),
+            (HighlightType.Underline, 11), //21
+            (HighlightType.Underline, 12),
+
+            (HighlightType.Underline, 13), //23
+        };
+
+
+        private (HighlightType, int) GetAnnotationData(int annId)
+        {
+            var index = annId % 24;
+            return _colourMap[index];
+        }
+
+        public string GetAnnotationColour(int annId)
+        {
+            var data = GetAnnotationData(annId);
+            switch (data.Item1)
             {
-                {
-                    HighlightType.Bracket, new Dictionary<int, string>
-                    {
-                        {1, "#666666"},
-                        {2, "#666666"}
-                    }
-                },
-                {
-                    HighlightType.Underline, new Dictionary<int, string>
-                    {
-                        {1, "#008000"},
-                        {2, "#0000ff"},
-                        {3, "#ff0000"},
-                        {4, "#9370db"}
-                    }
-                },
-                {
-                    HighlightType.Highlight, new Dictionary<int, string>
-                    {
-                        {2, "#48CCC9"},
-                        {3, "#FFA858"},
-                        {4, "#74FFAD"},
-                        {5, "#FF8CAC"},
-                        {6, "#CC54B1"}
-                    }
-                },
-            };
+                case HighlightType.Bracket:
+                    return _bracketColours[data.Item2];
+                case HighlightType.Underline:
+                    return UnderLineColours[data.Item2];
+                case HighlightType.Highlight:
+                    return _highlightColours[data.Item2];
+                default:
+                    return null;
+            }
+        }
+        
+
+        private (HighlightType, string) GetHighlightingData(int annId)
+        {
+            var data = GetAnnotationData(annId);
+            return (data.Item1, GetAnnotationColour(annId));
+        }
 
         /// <summary>
         /// Data to determine class, colour and the like for each annotation
@@ -81,33 +146,10 @@ namespace DocumentAnnotation.Annotator
         /// </summary>
         private void GenerateHighlightData()
         {
-            for (var i = 0; i < Annotations.Count; i++)
+            foreach (var ann in Annotations)
             {
-                var h = Annotations[i].AnnotationId % 11; // number of the highlight this annotation will receive
-                if (h < 4) // leads to annU2...5
-                {
-                    AnnotationData.Add(Annotations[i].AnnotationId, new AnnotationData
-                    {
-                        Colour = h + 1,
-                        Type = HighlightType.Underline
-                    });
-                }
-                else if (h < 9) // leads to annH2...6
-                {
-                    AnnotationData.Add(Annotations[i].AnnotationId, new AnnotationData
-                    {
-                        Colour = h - 2,
-                        Type = HighlightType.Highlight
-                    });
-                }
-                else // leads to annU1...2
-                {
-                    AnnotationData.Add(Annotations[i].AnnotationId, new AnnotationData
-                    {
-                        Colour = h - 8,
-                        Type = HighlightType.Bracket
-                    });
-                }
+                var data = GetAnnotationData(ann.AnnotationId);
+                AnnotationData.Add(ann.AnnotationId, new AnnotationData() {Colour = data.Item2, Type = data.Item1});
             }
         }
 
@@ -134,115 +176,13 @@ namespace DocumentAnnotation.Annotator
             }
         }
 
-        private bool IsWordHighlighted(int groupNo, int wordNo, int annId)
-        {
-            foreach (var highlight in Highlights[groupNo])
-            {
-                if (highlight.WordNumber == wordNo && highlight.AnnotationId == annId)
-                {
-                    return true;
-                }
-            }
 
-            return false;
-        }
-
-
-        public List<string> GetClasses(int groupNo, int wordNumber)
-        {
-            var classes = new List<string>();
-            foreach (var highlight in Highlights[groupNo])
-            {
-                
-                if (highlight.WordNumber == wordNumber)
-                {
-                    var className = GetClassName(highlight.AnnotationId);
-                    if (AnnotationData[highlight.AnnotationId].Type == HighlightType.Bracket)
-                    {
-                        int prevGroup, prevWord, nextGroup, nextWord;
-                        switch (wordNumber)
-                        {
-                            case 0 when groupNo == 0:
-                                prevGroup = 0;
-                                prevWord = -1; // there is no word before this one (in this section)
-                                break;
-                            case 0:
-                                prevWord = Groups[groupNo - 1].Data.Count - 1;
-                                prevGroup = groupNo - 1;
-                                break;
-                            default:
-                                prevGroup = groupNo;
-                                prevWord = wordNumber - 1;
-                                break;
-                        }
-
-                        var maxWords = Groups[groupNo].Data.Count;
-                        switch (maxWords - wordNumber)
-                        {
-                            case 1 when groupNo == Groups.Count - 1:
-                                nextGroup = groupNo;
-                                nextWord = -1; // there is no word after this one (in this section)
-                                break;
-                            case 1:
-                                nextWord = 0;
-                                nextGroup = groupNo + 1;
-                                break;
-                            default:
-                                nextGroup = groupNo;
-                                nextWord = wordNumber + 1;
-                                break;
-                        }
-
-                        var isNextHighlighted = IsWordHighlighted(nextGroup, nextWord, highlight.AnnotationId);
-                        var isPrevHighlighted = IsWordHighlighted(prevGroup, prevWord, highlight.AnnotationId);
-
-                        // ends at the end of this <span> 
-                        if (!isNextHighlighted)
-                        {
-                            className += "End";
-                        }
-
-                        // starts at the start of this <span> 
-                        if (!isPrevHighlighted)
-                        {
-                            className += "Start";
-                        }
-
-                        // goes straight through this <span>
-                        if (isPrevHighlighted && isNextHighlighted)
-                        {
-                            className += "Middle";
-                        }
-                    }
-
-
-                        classes.Add(className);
-                    
-                }
-
-                // 
-            }
-
-            return classes;
-        }
-
-        public string GetClassName(int annId)
-        {
-            var annDetails = AnnotationData[annId];
-            var typeInitial = HighlightInitials[annDetails.Type];
-            var className = $"ann{typeInitial}{annDetails.Colour}";
-            return className;
-        }
-        
-
-
-        public List<int> GetAnnotationIds(int groupNo, int character)
+        private List<int> GetAnnotationIds(int groupNo, int word)
         {
             var ids = new List<int>();
             foreach (var highlight in Highlights[groupNo])
             {
-                // any relation at all to this span
-                if (highlight.WordNumber == character)
+                if (highlight.WordNumber == word)
                 {
                     ids.Add(highlight.AnnotationId);
                 }
@@ -251,19 +191,30 @@ namespace DocumentAnnotation.Annotator
             return ids;
         }
 
-
-        public void Run()
+        public List<List<List<int>>> GetIdsForAllWords()
         {
-            GenerateHighlightData();
-            SimplifyHighlights();
+            var data = new List<List<List<int>>>();
+            for (int i = 0; i < Groups.Count; i++)
+            {
+                var groupData = new List<List<int>>();
+                for (int j = 0; j < Groups[i].Data.Count; j++)
+                {
+                    groupData.Add(GetAnnotationIds(i, j)); 
+                }
+                data.Add(groupData);
+            }
 
+            return data;
         }
-
-        public string GetColourName(int annotationId)
+        public Dictionary<int, string> GetColoursForAllWords()
         {
-            var annData = AnnotationData[annotationId];
+            var data = new Dictionary<int, string>();
+            foreach (var annotation in Annotations)
+            {
+                data.Add(annotation.AnnotationId, GetAnnotationColour(annotation.AnnotationId));
+            }
 
-            return Colours[annData.Type][annData.Colour];
+            return data;
         }
     }
 }

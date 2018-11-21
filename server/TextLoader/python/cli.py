@@ -17,12 +17,11 @@ parser.add_argument("--input-directory", "-i", type=str, required=True, dest="in
 parser.add_argument("--recursive", "-r", default=False, required=True, dest="recursive")
 parser.add_argument("--output-directory", "-o", type=str, required=True, dest="output")
 parser.add_argument("--identifier", "-f", type=str, required=False)
-parser.add_argument("--add-new-line", "-n", required=False, dest="newLine", default=False)
 
 args = parser.parse_args()
 
 if args.identifier:
-    tr = Transformer(args.input, args.output, args.identifier, args.newLine)
+    tr = Transformer(args.input, args.output, args.identifier)
     tr.build_output()
 else:
     # do all files in directory of form x.y.z.xml (not ...metadata.xml)
@@ -36,5 +35,5 @@ else:
         if file.endswith("metadata.xml"):
             pass
         else:
-            tr = Transformer(args.input, args.output, file[:11], args.newLine)
+            tr = Transformer(args.input, args.output, file[:11])
             tr.build_output()

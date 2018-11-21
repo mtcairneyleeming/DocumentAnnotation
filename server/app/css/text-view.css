@@ -1,5 +1,39 @@
-.group {
+.group > span.word {
     font-size: 1rem;
-    line-height: 3rem;
-    white-space: pre-wrap;
+    margin-bottom: 1rem;
+    padding-top: 2rem;
+    white-space: normal;
+    display: inline-block;
+    position: relative;
+}
+.group {
+    position: relative;
+}
+.group::after {
+    content: attr(data-name);
+    font-style: italic;
+    font-size: 0.75rem;
+    position: absolute;
+    right: -1.5rem;
+    top: 60%;
+    transform: translateY(-50%);
+}
+
+@media print {
+
+    @page {
+        size: a4 landscape;
+    }
+
+    body span.word {
+        font-size: 15pt;
+    }
+
+    .text-navigation {
+        display: none;
+    }
+
+    a {
+        color: black !important;
+    }
 }

@@ -195,7 +195,7 @@ namespace DocumentAnnotation.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("server.Models.DocumentAnnotation", b =>
+            modelBuilder.Entity("server.Models.Document", b =>
                 {
                     b.Property<int>("DocumentAnnotationId")
                         .ValueGeneratedOnAdd();
@@ -294,13 +294,13 @@ namespace DocumentAnnotation.Migrations
 
             modelBuilder.Entity("server.Models.Annotation", b =>
                 {
-                    b.HasOne("server.Models.DocumentAnnotation", "DocumentAnnotation")
+                    b.HasOne("server.Models.Document", "Document")
                         .WithMany("Annotations")
                         .HasForeignKey("DocumentAnnotationId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("server.Models.DocumentAnnotation", b =>
+            modelBuilder.Entity("server.Models.Document", b =>
                 {
                     b.HasOne("server.Models.TextData", "Text")
                         .WithMany()

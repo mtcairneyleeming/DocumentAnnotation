@@ -18,7 +18,7 @@ namespace DocumentAnnotation.Pages.Documents
         }
 
         [BindProperty]
-        public Models.DocumentAnnotation DocumentAnnotation { get; set; }
+        public Models.Document Document { get; set; }
 
         public IList<TextData> Texts { get; set; }
         public async Task<IActionResult> OnGetAsync(int? id)
@@ -28,10 +28,10 @@ namespace DocumentAnnotation.Pages.Documents
                 return NotFound();
             }
 
-            DocumentAnnotation = await _context.DocumentAnnotations.SingleOrDefaultAsync(m => m.DocumentAnnotationId == id);
+            Document = await _context.DocumentAnnotations.SingleOrDefaultAsync(m => m.DocumentId == id);
             Texts = _context.Texts.ToList();
             
-            if (DocumentAnnotation == null)
+            if (Document == null)
             {
                 return NotFound();
             }
@@ -46,11 +46,11 @@ namespace DocumentAnnotation.Pages.Documents
                 return NotFound();
             }
 
-            DocumentAnnotation = await _context.DocumentAnnotations.FindAsync(id);
+            Document = await _context.DocumentAnnotations.FindAsync(id);
 
-            if (DocumentAnnotation != null)
+            if (Document != null)
             {
-                _context.DocumentAnnotations.Remove(DocumentAnnotation);
+                _context.DocumentAnnotations.Remove(Document);
                 await _context.SaveChangesAsync();
             }
 

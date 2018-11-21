@@ -35,6 +35,11 @@
                 <span asp-validation-for="Text.Identifier" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Text.AddNewLine" class="control-label">Tick if text should not organically continue after each group in this text - e.g. true for verse, but false for everything else.</label>
+                <input asp-for="Text.AddNewLine" class="form-control" type="checkbox"/>
+                <span asp-validation-for="Text.AddNewLine" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default"/>
             </div>
         </form>

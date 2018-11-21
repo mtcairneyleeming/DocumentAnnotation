@@ -308,3 +308,11 @@ css
 css
 js
 Generated
+/screenshots/buddy-screenshot.png
+/screenshots/package.json
+/screenshots/package-lock.json
+/screenshots/screenshot.js
+/screenshots/test.pdf
+/server/appsettings.Production.json
+/server/stats.json
+/*.sql

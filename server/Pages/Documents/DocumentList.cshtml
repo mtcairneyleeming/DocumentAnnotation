@@ -1,29 +1,71 @@
-﻿@using DocumentAnnotation.Pages.Documents
-@model DocumentAnnotation.Pages.Documents.IndexModel
+﻿@using DocumentAnnotation.Models
+@using DocumentAnnotation.Pages.Documents
+@model DocumentAnnotation.Pages.Documents.DocumentListModel
 
-
+<h4>Your Documents</h4>
 <table class="table">
     <thead>
     <tr>
-        <th>Name</th>
-        <th>Text</th>
-        <th>Created by</th>
+        <th style="width: 10%">Name</th>
+        <th style="width: 10%">Text</th>
+        <th style="width: 20%">Created by</th>
+        <th style="width: 40%">Sharing</th>
         <th></th>
     </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model.DocumentAnnotation)
+    @foreach (var item in Model.MyDocuments.OrderBy(da => da.DocumentId))
     {
         <tr>
             <td>@Html.DisplayFor(modelItem => item.Name)</td>
             <td>@Html.DisplayFor(modelItem => item.Text.Title)</td>
             <td>@Html.DisplayFor(modelItem => item.User.Email)</td>
             <td>
-                <a asp-page="/Annotate/Edit" asp-route-docAnnId="@item.DocumentAnnotationId">
+
+                @if (item.Visibility == DocumentVisibility.Limited)
+                {
+                    <text>Limited to: @string.Join(", ", item.AllowedUsers)</text>
+                }
+                else
+                {
+                    <text>@(item.Visibility == DocumentVisibility.Public ? "Public" : "Private")</text>
+                }
+            </td>
+            <td>
+                <a asp-page="/Annotate/Edit" asp-route-docAnnId="@item.DocumentId">
                     <strong>Annotate</strong>
                 </a> |
-                <a asp-page="/Documents/Edit" asp-route-id="@item.DocumentAnnotationId">Edit details</a> |
-                <a asp-page="/Documents/Delete" asp-route-id="@item.DocumentAnnotationId">Delete</a>
+                <a asp-page="/Annotate/View" asp-route-docAnnId="@item.DocumentId">
+                    View
+                </a> |
+                <a asp-page="/Documents/Edit" asp-route-id="@item.DocumentId">Edit details</a> 
+            </td>
+        </tr>
+    }
+    <tr><td colspan="5"><a asp-page="/Documents/Create">Create a new document</a></td></tr>
+    </tbody>
+</table>
+<h4>Documents shared with you</h4>
+<table class="table">
+    <thead>
+    <tr>
+        <th style="width: 10%">Name</th>
+        <th style="width: 10%">Text</th>
+        <th style="width: 60%">Shared with you by</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.DocumentsSharedWithMe.OrderBy(da => da.DocumentId))
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+            <td>@Html.DisplayFor(modelItem => item.Text.Title)</td>
+            <td>@Html.DisplayFor(modelItem => item.User.Email)</td>
+            <td>
+                <a asp-page="/Annotate/View" asp-route-docAnnId="@item.DocumentId">
+                    <strong>View</strong>
+                </a>
             </td>
         </tr>
     }

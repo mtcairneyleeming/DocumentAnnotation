@@ -11,6 +11,10 @@
                 @UserManager.GetUserName(User)
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="dropdown-item" asp-page="/Admin/Index">Admin area</a> 
+            }
                 <a class="dropdown-item" asp-page="/Account/Manage/Index">My Account</a>
                 <div class="dropdown-divider"></div>
                 <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="form-inline dropdown-item ">

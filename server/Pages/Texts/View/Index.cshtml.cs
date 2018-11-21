@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using DocumentAnnotation.Models;
-using DocumentAnnotation.TextLoader.Models;
+using DocumentAnnotation.TextLoader;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -11,7 +11,7 @@ namespace DocumentAnnotation.Pages.Texts.View
     public class IndexModel : PageModel
     {
         private readonly AnnotationContext _context;
-        public readonly TextLoader.TextLoader _loader;
+        private readonly TextLoader.TextLoader _loader;
 
         public IndexModel(AnnotationContext context, TextLoader.TextLoader loader)
         {
@@ -19,24 +19,17 @@ namespace DocumentAnnotation.Pages.Texts.View
             _loader = loader;
         }
 
-        public TextData TextData { get; set; }
+        public TextData TextData { get; private set; }
 
-        /// <summary>
-        /// The text we are annotating - I believe this is passed by reference, so the whole thing doesn't have to be
-        /// copied
-        /// </summary>
-        public Text FullText { get; set; }
+
+        public Text Text { get; private set; }
 
         private int BookNum { get; set; }
         private int SectionNum { get; set; }
 
-        public Book Book => FullText.Books[BookNum];
+        public Book Book => Text.Books[BookNum];
         public Section Section => Book.Sections[SectionNum];
         public List<Group> Groups => Section.Groups;
-        public Models.DocumentAnnotation DocAnn { get; set; }
-
-        public Annotator.Annotator Annotator { get; private set; }
-
 
         public IActionResult OnGet(string textIdentifier, string book, string section)
         {
@@ -48,6 +41,8 @@ namespace DocumentAnnotation.Pages.Texts.View
                 return NotFound();
             }
 
+            Text = _loader.LoadText(TextData.Identifier);
+            
             if (book is null)
             {
                 // make an assumption, open the first book
@@ -56,22 +51,18 @@ namespace DocumentAnnotation.Pages.Texts.View
             else if (section is null)
             {
                 // load the first section of the chosen book
-                BookNum = _loader.GetIndexFromName(TextData.Identifier, book);
+                BookNum = Text.GetBookIndexFromName(book);
                 SectionNum = 0;
             }
             else
             {
-                (BookNum, SectionNum) = _loader.GetIndexFromName(TextData.Identifier, book, section);
+                (BookNum, SectionNum) = Text.GetIndexesFromName(book, section);
             }
 
-            FullText = _loader.LoadText(TextData.Identifier);
+
 
             return Page();
         }
 
-        private string GetCurrentUser()
-        {
-            return User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        }
     }
 }

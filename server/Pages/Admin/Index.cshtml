@@ -1,0 +1,14 @@
+@page
+
+@{
+    ViewData["Title"] = "Admin area";
+    Layout = "~/Pages/_Layout.cshtml";
+}
+
+<h1>Administration</h1>
+
+<h3>Available tools</h3>
+<dl class="dl-horizontal">
+    <dt>Link shorteners</dt>
+    <dd><a asp-page="LinkShorteners/Index">Set here</a></dd>
+</dl>

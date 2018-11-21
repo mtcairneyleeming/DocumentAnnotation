@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using DocumentAnnotation.Models;
-using DocumentAnnotation.TextLoader.Models;
+using DocumentAnnotation.TextLoader;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +13,7 @@ namespace DocumentAnnotation.Pages.Annotate
     public class EditModel : PageModel
     {
         private readonly AnnotationContext _context;
-        public readonly TextLoader.TextLoader _loader;
+        private readonly TextLoader.TextLoader _loader;
 
         public EditModel(AnnotationContext context, TextLoader.TextLoader loader)
         {
@@ -21,28 +21,21 @@ namespace DocumentAnnotation.Pages.Annotate
             _loader = loader;
         }
 
-        public TextData TextData { get; set; }
+        public TextData TextData { get; private set; }
 
-        /// <summary>
-        /// The text we are annotating - I believe this is passed by reference, so the whole thing doesn't have to be
-        /// copied
-        /// </summary>
-        public Text FullText { get; set; }
+        public Text Text { get; private set; }
 
-        public int BookNum { get; set; }
-        public int SectionNum { get; set; }
+        public int BookNum { get; private set; }
+        public int SectionNum { get; private set; }
 
-        public Book Book => FullText.Books[BookNum];
+        public Book Book => Text.Books[BookNum];
         public Section Section => Book.Sections[SectionNum];
         public List<Group> Groups => Section.Groups;
-        public Models.DocumentAnnotation DocAnn { get; set; }
+        public Models.Document DocAnn { get; private set; }
 
         public Annotator.Annotator Annotator { get; private set; }
 
-        [BindProperty]
-        public Annotation NewAnnotation { get; set; }
-
-        public IActionResult OnGet(int? docAnnId, string book, string section)
+        public IActionResult OnGet(int? docAnnId, string book, string section, bool print = false)
         {
             if (docAnnId == null)
             {
@@ -50,54 +43,72 @@ namespace DocumentAnnotation.Pages.Annotate
             }
 
             // load the document requested, checking that the current user created it.
-            DocAnn = _context.DocumentAnnotations.Include(da => da.User).Include(da => da.Text).SingleOrDefault(da =>
-                da.DocumentAnnotationId == docAnnId && da.UserId == GetCurrentUser());
+            var docAnn = _context.DocumentAnnotations.Include(da => da.User).Include(da => da.Text).SingleOrDefault(da =>
+                da.DocumentId == docAnnId);
 
-            if (DocAnn is null)
+            if (docAnn is null)
             {
                 return NotFound();
             }
 
-            TextData = DocAnn.Text;
+            if (docAnn.UserId != GetCurrentUser())
+            {
+                return NotFound();
+            }
+
+            TextData = docAnn.Text;
 
             if (TextData == null)
             {
+                Log.Warning("A user attempted to load a document, {docId} that did not have a valid text, {textId}.", docAnn.DocumentId,
+                    docAnn.TextId);
                 return NotFound();
             }
 
+            Text = _loader.LoadText(TextData.Identifier);
+
             if (book is null)
             {
-                // make an assumption, open the first book
-                BookNum = 0;
-                SectionNum = 0;
+                // make an assumption, open the last-viewed section of this document
+                BookNum = docAnn.LastLocation.BookNumber;
+                SectionNum = docAnn.LastLocation.SectionNumber;
             }
-            else if (section is null)
+            else if (section is null) // but book is not
             {
                 // load the first section of the chosen book
-                BookNum = _loader.GetIndexFromName(TextData.Identifier, book);
+                BookNum = Text.GetBookIndexFromName(book);
                 SectionNum = 0;
             }
             else
             {
-                (BookNum, SectionNum) = _loader.GetIndexFromName(TextData.Identifier, book, section);
+                (BookNum, SectionNum) = Text.GetIndexesFromName(book, section);
             }
 
-            FullText = _loader.LoadText(TextData.Identifier);
 
             // load appropriate annotations
             var annotations = _context.Annotations
                 .Include(a => a.Highlights).ThenInclude(h => h.Location)
                 .Where(a =>
-                    a.DocumentAnnotationId == docAnnId &&
+                    a.DocumentId == docAnnId &&
                     a.Highlights.Any(h => h.Location.BookNumber == BookNum &&
                                           h.Location.SectionNumber == SectionNum
                     ))
-                .Include(a => a.Highlights)
                 .ToList();
 
             Annotator = new Annotator.Annotator(annotations, Groups);
+
+
+            // save last-viewed location to the database
+            docAnn.LastLocation = new Location(BookNum, SectionNum);
+            _context.SaveChanges();
+            DocAnn = docAnn;
+
+            Print = print;
+
             return Page();
         }
+
+        public object Print { get; set; }
 
         private string GetCurrentUser()
         {

@@ -1,16 +1,14 @@
 ﻿@page
-@using System
-@using DocumentAnnotation.Annotator
+
 @using DocumentAnnotation.Extensions
-@using DocumentAnnotation.Pages.Annotate
 @using DocumentAnnotation.Pages.Partials
-@using Serilog
 @model DocumentAnnotation.Pages.Annotate.EditModel
 
 @{
-    ViewData["Title"] = Model.TextData.Title + ", " + Model.TextData.Author;
-    ViewData["PageTitle"] = Model.TextData.Title + ", " + Model.TextData.Author;
-    ViewData["PageSubtitle"] = $"Annotations on Book {Model.Book.Name}, Section {Model.Section.Name}";
+    ViewData["Title"] = $"Bk{Model.Book.Name}, Sec{Model.Section.Name}, {Model.TextData.Title} - {Model.DocAnn.Name}";
+    ViewData["PageTitle"] = $"{Model.DocAnn.Name}";
+    ViewData["PageSubtitle"] = $"Annotations on book {Model.Book.Name}, section {Model.Section.Name} of the {Model.TextData.Title}";
+    ViewData["PageExtraText"] = $"Created by {Model.DocAnn.User.Email}";
 }
 
 @section Styles {
@@ -20,97 +18,35 @@
 @section Scripts {
     @await Html.WebpackScriptsAsync("page-annotate-edit")
     @Html.JsonDataBlock("annotations", Model.Annotator.Annotations)
-    @Html.JsonDataBlock("annotation-colours", Model.Annotator.Annotations.ToDictionary(a => a.AnnotationId, a => Model.Annotator.GetColourName(a.AnnotationId)))
-    @Html.JsonDataBlock("annotation-classes", Model.Annotator.Annotations.ToDictionary(a => a.AnnotationId, a => Model.Annotator.GetClassName(a.AnnotationId)))
+
+
 
     @await Html.WebpackScriptsAsync("page-text-view")
-    @Html.JsonDataBlock("text-names", Model._loader.CloneNames(Model.FullText.Identifier))
+    @Html.JsonDataBlock("text-names", Model.Text.CloneNames())
     @Html.JsonDataBlock("info", new
     {
         bookId = Model.Book.Name,
         bookNumber = Model.BookNum,
         sectionId = Model.Section.Name,
         sectionNumber = Model.SectionNum,
-        docAnnId = Model.DocAnn.DocumentAnnotationId
+        docAnnId = Model.DocAnn.DocumentId,
+        
+        print = Model.Print
     })
-}
-
-@section Sidebar
-{
-    @await Html.PartialAsync("Partials/TextNavigation")
-    @await Html.PartialAsync("Partials/DocumentDetails", Model.DocAnn)
-    @await Html.PartialAsync("Partials/TextDetails", new TextDetails(Model.TextData, Model.Book.Name, Model.Section.Name))
 }
 
 
 <div id="container-fluid">
     <div id="foregroundContainer">
-        <p id="document">
-            @for (var i = 0; i < Model.Groups.Count; i++)
-            {
-                var group = Model.Groups[i];
-                <span class="group" id="group@(i)">
-                    @*for each word in the group*@
-                    @for (var j = 0; j < group.Data.Count; j++)
-                    {
-                        var word = group.Data[j];
-                        var classes = string.Join(' ', Model.Annotator.GetClasses(i, j).ToArray().Append("word"));
-                        var ids = string.Join(",", Model.Annotator.GetAnnotationIds(i, j).ToArray());
-
-                        <span id="@i-@j" data-ids="@ids" class="@classes">@word </span>
-                    }
-                </span>
-                if (Model.Groups[i].AddNewLine)
-                {
-                    <br/>
-                }
-            }
-            <span class="group" id="group@(Model.Groups.Count)"></span>
-
-        </p>
+        <div id="documentContainer">
+            @await Html.PartialAsync("Partials/AnnotatedTextPartial", new AnnotatedTextPartial(Model.Groups, Model.Annotator.GetIdsForAllWords(), Model.TextData.AddNewLine))
+            @await Html.PartialAsync("Partials/TextNavigation")
+        </div>
         <div id="annotationContainer">
-            <table class="table table-striped" id="annotationTable">
-                <thead>
-                <tr>
-                    <th style="width: 1%"></th>
-                    <th style="width: 20%">Title</th>
-                    <th style="width: 59%">Description</th>
-                    <th style="width: 20%"></th>
-                </tr>
-                </thead>
-                <tbody>
-                @for (var i = 0; i < Model.Annotator.Annotations.Count; i++)
-                {
-                    var ann = Model.Annotator.Annotations[i];
-                    <tr id="annotation@(ann.AnnotationId)" data-ann-id="@ann.AnnotationId">
-                        <td style="background-color: @Model.Annotator.GetColourName(ann.AnnotationId)" class="annotationTableColour"></td>
-                        <td>@ann.Title</td>
-                        <td>
-                            <p>@ann.Body</p>
-                        </td>
-                        <td>
-                            <a class="annotationEditLink btn btn-light">Edit</a>
-                        </td>
-                    </tr>
-                }
-                <tfoot>
-                <tr id="annotation0" data-ann-id="0" class="newAnnotationRow">
-                    <td style="background-color: #ffff00"></td>
-                    <td>
-                        <input type="text" class="form-control annTitle" placeholder="Annotation Title"
-                               value="">
-                    </td>
-                    <td>
-                        <textarea rows="2" placeholder="Your annotation" class="form-control annBody"></textarea>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary ann-new-save">Save</button>
-                        <button class="btn btn-outline-danger ann-new-cancel">Cancel</button>
-                    </td>
-                </tr>
-                </tfoot>
-                </tbody>
-            </table>
+            @await Html.PartialAsync("Partials/AnnotationTablePartial", new AnnotationTablePartial(Model.Annotator.Annotations, Model.Annotator.GetColoursForAllWords(), true))
+            <button class="btn btn-sm btn-secondary" id="colouredModeToggle">Toggle coloured mode</button>
+            <hr/>
+            @await Html.PartialAsync("Partials/TextDetails", new TextDetails(Model.TextData, Model.Book.Name, Model.Section.Name))
         </div>
 
     </div>

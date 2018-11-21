@@ -14,14 +14,14 @@
             Name:
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.DocumentAnnotation.Name)
+            @Html.DisplayFor(model => model.Document.Name)
         </dd>
         <dt>
             Text:
         </dt>
         <dd>
             @{
-                var text = Model.Texts.First(t => t.TextId == Model.DocumentAnnotation.TextId);
+                var text = Model.Texts.First(t => t.TextId == Model.Document.TextId);
             }
             @text.Title, by @text.Author
         </dd>
@@ -35,8 +35,8 @@
     </dl>
 
     <form method="post">
-        <input type="hidden" asp-for="DocumentAnnotation.DocumentAnnotationId"/>
+        <input type="hidden" asp-for="Document.DocumentId"/>
         <input type="submit" value="Delete" class="btn btn-danger"/> 
-        <a class="btn btn-secondary" asp-page="./Index">Back to List</a>
+        <a class="btn btn-secondary" asp-page="./Edit" asp-route-id="@Model.Document.DocumentId">Cancel</a>
     </form>
 </div>

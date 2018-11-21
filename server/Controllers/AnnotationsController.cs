@@ -5,7 +5,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using DocumentAnnotation.Models;
-using DocumentAnnotation.TextLoader.Models;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,12 +25,6 @@ namespace DocumentAnnotation.Controllers
         public List<Highlight> HighlightsToAdd { get; set; }
     }
 
-    public class AnnotationColourDTO
-    {
-        public int AnnotationId { get; set; }
-        public string Colour { get; set; }
-        public string ColourClassName { get; set; }
-    }
 
 
     [Produces("application/json")]
@@ -90,7 +83,7 @@ namespace DocumentAnnotation.Controllers
 
             var docAnn =
                 _context.DocumentAnnotations.SingleOrDefault(d =>
-                    d.DocumentAnnotationId == ann.DocumentAnnotationId);
+                    d.DocumentId == ann.DocumentId);
             if (docAnn is null)
             {
                 return BadRequest();
@@ -144,7 +137,7 @@ namespace DocumentAnnotation.Controllers
 
         // POST: api/Annotations
         [HttpPost]
-        public async Task<IActionResult> PostAnnotation([FromBody] AnnotationPostDTO annotation)
+        public async Task<ActionResult<Annotation>> PostAnnotation([FromBody] AnnotationPostDTO annotation)
         {
             if (!ModelState.IsValid)
             {
@@ -152,9 +145,10 @@ namespace DocumentAnnotation.Controllers
             }
 
             var ann = annotation.Annotation;
-            var docAnn = _context.DocumentAnnotations.SingleOrDefault(da => da.DocumentAnnotationId == ann.DocumentAnnotationId);
+            var docAnn = _context.DocumentAnnotations.SingleOrDefault(da => da.DocumentId == ann.DocumentId);
             if (docAnn is null || docAnn.UserId != GetCurrentUser())
             {
+                Log.Information(GetCurrentUser());
                 return Unauthorized();
             }
 
@@ -172,20 +166,7 @@ namespace DocumentAnnotation.Controllers
             return CreatedAtAction("GetAnnotation", new {id = annotation.Annotation.AnnotationId}, annotation);
         }
 
-        [HttpGet("{id}/Colour")]
-        public ActionResult<AnnotationColourDTO> Colour([FromRoute] int id)
-        {
-            var annotation = _context.Annotations.Include(a=> a.Highlights).SingleOrDefault(a => a.AnnotationId == id);
-            var docAnn = _context.DocumentAnnotations.SingleOrDefault(da => da.DocumentAnnotationId == annotation.DocumentAnnotationId);
-            if (docAnn is null || docAnn.UserId != GetCurrentUser())
-            {
-                return Unauthorized();
-            }
-
-            var annotator = new Annotator.Annotator(new List<Annotation>() {annotation}, new List<Group>());
-            return Ok(new AnnotationColourDTO()
-                {AnnotationId = id, Colour = annotator.GetColourName(id), ColourClassName = annotator.GetClassName(id)});
-        }
+      
 
         // DELETE: api/Annotations/5
         [HttpDelete("{id}")]
@@ -196,13 +177,13 @@ namespace DocumentAnnotation.Controllers
                 return BadRequest(ModelState);
             }
 
-            var annotation = await _context.Annotations.Include(a => a.DocumentAnnotation).SingleOrDefaultAsync(m => m.AnnotationId == id);
+            var annotation = await _context.Annotations.Include(a => a.Document).SingleOrDefaultAsync(m => m.AnnotationId == id);
             if (annotation == null)
             {
                 return NotFound();
             }
 
-            if (annotation.DocumentAnnotation.UserId != GetCurrentUser())
+            if (annotation.Document.UserId != GetCurrentUser())
             {
                 return Unauthorized();
             }

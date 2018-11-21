@@ -1,6 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using DocumentAnnotation.Extensions;
 using DocumentAnnotation.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,18 +12,20 @@ namespace DocumentAnnotation.Pages.Documents
 {
     public class IndexModel : PageModel
     {
-        private readonly AnnotationContext _context;
+        public readonly AnnotationContext _context;
+        public readonly UserManager<AppUser> _userManager;
 
-        public IndexModel(AnnotationContext context)
+        public IndexModel(AnnotationContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        public IList<Models.DocumentAnnotation> DocumentAnnotation { get; set; }
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
-            DocumentAnnotation = await _context.DocumentAnnotations.Include(da => da.User).Include(da => da.Text).ToListAsync();
+          
         }
+        
     }
 }

@@ -8,7 +8,7 @@ namespace DocumentAnnotation.Pages.Texts
 {
     public class IndexModel : PageModel
     {
-        private readonly AnnotationContext _context;
+        public readonly AnnotationContext _context;
 
         public IndexModel(AnnotationContext context)
         {

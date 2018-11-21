@@ -5,6 +5,6 @@ namespace DocumentAnnotation.Models
 {
     public class AppUser : IdentityUser
     {
-        public List<DocumentAnnotation> DocumentAnnotations { get; set; }
+        public List<Document> DocumentAnnotations { get; set; }
     }
 }

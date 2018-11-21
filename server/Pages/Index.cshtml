@@ -13,40 +13,42 @@
 {
     <div class="jumbotron">
 
-        <h1 class="display-4">Welcome!</h1>
+        <h1 class="display-4">Welcome back!</h1>
         <p class="lead">Use the lists below or the links to find the text/document you'd like.</p>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <h4>AvailableTexts</h4>
-            @{
-                var textsModel = new global::DocumentAnnotation.Pages.Texts.IndexModel(Model._context);
-                await textsModel.OnGetAsync();
-            }
-            @await Html.PartialAsync("Texts/TextList", textsModel)
-        </div>
-        <div class="col-md-6">
-            <h4>Your Documents</h4>
-            @{
-                var docsModel = new global::DocumentAnnotation.Pages.Documents.IndexModel(Model._context);
-                await docsModel.OnGetAsync();
-            }
-            @await Html.PartialAsync("Documents/DocumentList", docsModel)
-        </div>
-    </div>
+
+    var docsModel = new global::DocumentAnnotation.Pages.Documents.DocumentListModel(Model._context, Model.UserManager, Model.User);
+    await docsModel.OnGetAsync();
+
+    @await Html.PartialAsync("Documents/DocumentList", docsModel)
+    
+    <hr/>
+    <h4>Available Texts</h4>
+
+    var textsModel = new global::DocumentAnnotation.Pages.Texts.TextListModel(Model._context, Model.User);
+    await textsModel.OnGetAsync();
+
+    @await Html.PartialAsync("Texts/TextList", textsModel)
+
 }
 else
 {
     <div class="jumbotron">
 
         <h1 class="display-4">Welcome!</h1>
-        <p class="lead">Log in to get started reading and annotating texts.</p>
+        <p class="lead">Log in to get started annotating texts.</p>
         <hr class="my-4">
-        <p>Once logged in, use the buttons above or below to read texts, annotate them and read your annotations.</p>
         <p class="lead">
             <a class="btn btn-primary btn-lg" asp-page="/Account/Login" role="button">Log in</a>
             or
             <a class="btn btn-primary btn-lg" asp-page="/Account/Register" role="button">Register</a>
         </p>
     </div>
+    <h4>Texts available to read and annotate</h4>
+    <p>(So far - more are being added)</p>
+
+    var textsModel = new global::DocumentAnnotation.Pages.Texts.TextListModel(Model._context, Model.User);
+    await textsModel.OnGetAsync();
+
+    @await Html.PartialAsync("Texts/TextList", textsModel)
 }

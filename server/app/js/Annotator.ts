@@ -1,12 +1,21 @@
-import * as Konva from 'konva';
-import axios, {AxiosPromise, AxiosResponse} from 'axios'
+import {Layer, Line, Node, Rect, Stage} from 'konva';
+import axios from 'axios'
 import * as $ from 'jquery'
 import {Annotation, Highlight, Place} from "./AnnotationTypes";
+import {isNull, isNullOrUndefined} from "util";
+import {getAnnotationColour, getHighlightingData, HighlightType} from './colours'
 
 class LineInfo {
 
     public annId: number;
-    public line: Konva.Line;
+    public line: Line;
+}
+
+enum BracketStatus {
+    Start,
+    Middle,
+    End,
+    Single
 }
 
 export class Annotator {
@@ -21,41 +30,34 @@ export class Annotator {
     private highlightsToAdd: Highlight[];
     private highlightsToRemove: Highlight[];
 
-    // colour info per annotation
-    private readonly annColours: { [id: number]: string } = {};
-    // class info per annotation
-    private readonly annClasses: { [id: number]: string } = {};
+    private colouredMode: boolean = true;
+    private annotationNumbers: { [annId: number]: number } = {};
+
     // record of currently-edited annotation
     private annBeingEdited: number;
     // lines joining annotations to highlights
-    private readonly annLines: LineInfo[];
+    private annLines: LineInfo[];
 
-    private readonly editing
 
     // containers for various aspects of the UI
     private contentCtr: HTMLElement;
+    private document: HTMLElement;
     private annCtr: HTMLElement;
     private backgroundCtr: HTMLElement;
     // stage and layer for the line-canvas
-    private stage: Konva.Stage;
-    private readonly layer: Konva.Layer;
-    private newAnnotation: Annotation;
+    private stage: Stage;
+    private readonly layer: Layer;
 
     constructor(annotations,
-                annColours: { [id: number]: string },
-                annClasses: { [id: number]: string },
                 docAnnId: number,
                 bookNum: number,
                 sectionNum: number,
-                editing = true) {
+                printMode: boolean) {
         this.annotations = annotations;
         this.annotations.push(new Annotation([], "", "", 0, docAnnId));
         this.annBeingEdited = 0;
 
         this.annLines = [];
-        this.annColours = annColours;
-        this.annClasses = annClasses;
-        this.annClasses[0] = "annH1";
 
         this.highlightsToAdd = [];
         this.highlightsToRemove = [];
@@ -64,141 +66,392 @@ export class Annotator {
         this.bookNum = bookNum;
         this.sectionNum = sectionNum;
 
-        this.editing = editing;
 
-
-        this.contentCtr = document.getElementById("document");
+        this.contentCtr = document.getElementById("contentContainer");
+        this.document = document.getElementById("document");
         this.annCtr = document.getElementById("annotationTable");
         this.backgroundCtr = document.getElementById("backgroundContainer");
         // initial set up of canvas
-        let foreground = document.getElementById("foregroundContainer");
-        this.stage = new Konva.Stage({
+        this.stage = new Stage({
             container: "backgroundContainer",
-            width: foreground.clientWidth,
-            height: foreground.clientHeight
+            width: this.contentCtr.clientWidth,
+            height: this.contentCtr.clientHeight
         });
 
-        this.layer = new Konva.Layer();
+        this.layer = new Layer();
         this.stage.add(this.layer);
+        if (printMode) {
+            this.colouredMode = false;
+        } else {
+
+            this.colouredMode = window.localStorage.getItem("displayMode") != "lines";
+        }
     }
 
     // Canvas management ===============================================================================================
 
-    getAnnotationIdsFromElement(element: HTMLElement): number[] {
+    private getAnnotationIdsFromElement(element: HTMLElement): number[] {
         return element.dataset.ids.split(",").map(id => parseInt(id, 10)).filter(id => !Number.isNaN(id));
     }
 
-    drawLines() {
+    public draw() {
         // draw lines from a highlight to the annotation comment
 
         const groups = document.getElementsByClassName("group");
 
-        // clear previous lines
-        for (let line of this.annLines) {
-            line.line.destroy();
-            this.annLines.splice(this.annLines.indexOf(line), 1)
-        }
+        // clear layer
+        this.layer.destroyChildren();
+        this.annLines = [];
+        const shapesToAdd: Node[] = [];
         for (let i = 0; i < groups.length; i++) {
             let group = groups[i];
             for (let j = 0; j < group.children.length; j++) {
-                this.drawLine(<HTMLElement>group.children[j], <HTMLElement>group.children[j + 1])
+                const span = <HTMLElement>group.children[j];
+                if (this.colouredMode) {
+                    this.hideTableAnnotationNumbers();
+                    Annotator.hideDocumentNumbers(span);
+                    let lines = this.createLines(span, <HTMLElement>group.children[j + 1]);
+                    if (lines.length > 0) {
+                        shapesToAdd.push(...lines);
+                    }
+                    let highlights = this.createHighlights(span);
+                    if (highlights.length > 0) {
+                        shapesToAdd.push(...highlights);
+                    }
+
+                    this.addHighlightHandlers(span);
+                } else {
+                    this.showTableAnnotationNumbers();
+                    this.showDocumentNumbers(span, <HTMLSpanElement>group.children[j - 1]);
+
+
+                }
             }
+        }
+        if (shapesToAdd.length > 0) {
+            this.layer.add(...shapesToAdd);
+        }
+        this.updateCanvas();
+    }
+
+    private createHighlights(span: HTMLSpanElement): Node[] {
+        const shapesToAdd = [];
+
+
+        if (span.dataset.ids) { // if annotated
+            const ids: number[] = this.getAnnotationIdsFromElement(span);
+
+
+            for (let i = 0; i < ids.length; i++) {
+                let id = ids[i];
+
+                // HIGHLIGHT DRAWING 
+                const spanRect = span.getBoundingClientRect();
+                const canvasRect = this.contentCtr.getBoundingClientRect();
+
+                const spanBottomLeft = {
+                    x: spanRect.left - canvasRect.left + 15, // adapt for margins and for offset of highlight line
+                    y: spanRect.bottom - canvasRect.top
+                };
+                const spanTopLeft = {
+                    x: spanBottomLeft.x,
+                    y: spanBottomLeft.y - spanRect.height + Annotator.convertRemToPixels(2)
+                };
+                const spanBottomRight = {
+                    x: spanBottomLeft.x + spanRect.width + 4.4,
+                    y: spanBottomLeft.y
+                };
+                const spanTopRight = {
+                    x: spanBottomRight.x,
+                    y: spanTopLeft.y
+                };
+                const spanWidth = spanBottomRight.x - spanBottomLeft.x;
+                const spanHeight = spanBottomLeft.y - spanTopLeft.y;
+
+
+                let data = getHighlightingData(id);
+                switch (data[0]) {
+                    case HighlightType.Brackets:
+                        const status = this.getBracketStatus(span, id);
+                        switch (status) {
+                            case BracketStatus.Start:
+                                shapesToAdd.push(new Line({
+                                    points: [spanTopLeft.x + 10, spanTopLeft.y, spanTopLeft.x, spanTopLeft.y, spanBottomLeft.x, spanBottomLeft.y + 4, spanBottomLeft.x + 10, spanBottomLeft.y + 4],
+                                    strokeWidth: 2,
+                                    stroke: data[1]
+                                }));
+
+                                break;
+                            case BracketStatus.Middle:
+                                // do nothing normally
+                                break;
+                            case BracketStatus.End:
+                                shapesToAdd.push(new Line({
+                                    points: [spanTopRight.x - 10, spanTopRight.y, spanTopRight.x, spanTopRight.y, spanBottomRight.x, spanBottomRight.y + 4, spanBottomRight.x - 10, spanBottomRight.y + 4],
+                                    strokeWidth: 2,
+                                    stroke: data[1]
+                                }));
+                                break;
+                            case BracketStatus.Single:
+                                shapesToAdd.push(new Line({
+                                    points: [spanTopLeft.x + 10, spanTopLeft.y, spanTopLeft.x, spanTopLeft.y, spanBottomLeft.x, spanBottomLeft.y + 4, spanBottomLeft.x + 10, spanBottomLeft.y + 4],
+                                    strokeWidth: 2,
+                                    stroke: data[1]
+                                }));
+                                shapesToAdd.push(new Line({
+                                    points: [spanTopRight.x - 10, spanTopRight.y, spanTopRight.x, spanTopRight.y, spanBottomRight.x, spanBottomRight.y + 4, spanBottomRight.x - 10, spanBottomRight.y + 4],
+                                    strokeWidth: 2,
+                                    stroke: data[1]
+                                }));
+                                break;
+                        }
+                        const hoverTopLine = new Line({
+                            points: [spanTopLeft.x, spanTopLeft.y, spanTopRight.x, spanTopRight.y],
+                            strokeWidth: 2,
+                            stroke: getAnnotationColour(id),
+                            visible: false
+                        });
+                        shapesToAdd.push(hoverTopLine);
+                        const hoverBottomLine = new Line({
+                            points: [spanBottomLeft.x, spanBottomLeft.y + 4, spanBottomRight.x, spanBottomRight.y + 4],
+                            strokeWidth: 2,
+                            stroke: getAnnotationColour(id),
+                            visible: false
+                        });
+                        shapesToAdd.push(hoverBottomLine);
+                        $(span).hover(
+                            () => {
+                                hoverTopLine.visible(true);
+                                hoverBottomLine.visible(true);
+                                this.updateCanvas();
+                            },
+                            () => {
+                                hoverTopLine.visible(false);
+                                hoverBottomLine.visible(false);
+                                this.updateCanvas();
+                            });
+
+                        break;
+                    case HighlightType.Underline:
+                        const underlineRect = new Rect({
+                            x: spanBottomLeft.x,
+                            y: spanBottomLeft.y + i * 4,
+                            height: 4,
+                            width: spanWidth,
+                            fill: getAnnotationColour(id)
+                        });
+                        shapesToAdd.push(underlineRect);
+                        break;
+                    case HighlightType.Highlight:
+                        const highlightRect = new Rect({
+                            x: spanBottomLeft.x,
+                            y: spanTopLeft.y,
+                            height: spanHeight + 4,
+                            width: spanWidth,
+                            opacity: 0.5,
+                            fill: getAnnotationColour(id)
+                        });
+                        shapesToAdd.push(highlightRect);
+                        break;
+                }
+            }
+        }
+        return shapesToAdd;
+    }
+
+    private addHighlightHandlers(span: HTMLSpanElement) {
+        if (span.dataset.ids) { // if annotated
+
+            const ids: number[] = this.getAnnotationIdsFromElement(span);
+
+            // add mouseover handlers to emphasise the links between highlights and annotations
+            $(span).hover(
+                () => {
+                    const lines = this.annLines.filter(l => ids.indexOf(l.annId) >= 0);
+                    if (lines.length == 0) {
+                    } else {
+                        for (let line of lines) {
+                            line.line.dash([10, 0]);
+                            line.line.opacity(100);
+                            this.updateCanvas();
+                        }
+
+                    }
+                },
+                () => {
+                    const lines = this.annLines.filter(l => ids.indexOf(l.annId) >= 0);
+                    if (lines.length == 0) {
+                    } else {
+                        for (let line of lines) {
+                            line.line.dash([5, 15]);
+                            line.line.opacity(line.annId != 0 ? 0.5 : 1);
+                            this.updateCanvas();
+                        }
+                    }
+                });
         }
     }
 
-    drawLine(span: HTMLElement, next: HTMLElement) {
+    private createLines(span: HTMLSpanElement, next: HTMLSpanElement): Line[] {
+
+        let shapesToAdd: Line[] = [];
 
         if (span.dataset.ids) { // if annotated
 
             const ids: number[] = this.getAnnotationIdsFromElement(span);
 
 
-            // add mouseover handlers to emphasise the links between highlights and annotations
-            $(span).hover(
-                () => {
-                    var lines = this.annLines.filter(l => ids.indexOf(l.annId) >= 0);
-                    if (lines.length == 0) {
-                        console.log(span.id);
-                        console.log(this.annLines)
-                    } else {
-                        for (var line of lines) {
-                            line.line.dash([10, 0]);
-                            this.updateCanvas();
-                        }
-
-                    }
-                },
-                () => {
-                    var lines = this.annLines.filter(l => ids.indexOf(l.annId) >= 0);
-                    if (lines.length == 0) {
-                        console.log(span.id);
-                        console.log(this.annLines)
-                    } else {
-                        for (var line of lines) {
-                            line.line.dash([5, 15]);
-                            this.updateCanvas();
-                        }
-                    }
-                });
-
             for (let id of ids) {
                 if (next) {
                     if (this.getAnnotationIdsFromElement(next).indexOf(id) != -1) {
-                        return; // only draw lines to the last character in the highlight
+                        return []; // only draw lines to the last character in the highlight
                     }
                 }
                 const spanRect = span.getBoundingClientRect();
                 const canvasRect = this.contentCtr.getBoundingClientRect();
-                const titleRect = document.getElementById("title").getBoundingClientRect();
-                // drawing from bottom right corner:
+                const spanBottomLeft = {
+                    x: spanRect.left - canvasRect.left + 15, // adapt for margins and for offset of highlight line
+                    y: spanRect.bottom - canvasRect.top
+                };
+
                 const spanBottomRight = {
-                    x: spanRect.right - canvasRect.left + 30 - 1, // adapt for margins and for offset of highlight line
-                    y: spanRect.bottom - canvasRect.top + 15
+                    x: spanBottomLeft.x + spanRect.width + 5,
+                    y: spanBottomLeft.y + 2
                 };
 
-                const annRect = document.getElementById(`annotation${id}`).getBoundingClientRect();
+
+                const tableRow = document.getElementById(`annotation${id}`).getBoundingClientRect();
                 const annLeftMiddle = {
-                    x: annRect.left - canvasRect.left + 30, // adapt for margins
-                    y: annRect.top - (0.5 * (annRect.top - annRect.bottom)) - canvasRect.top + 15
+                    x: tableRow.left - canvasRect.left + 15, // adapt for margins
+                    y: tableRow.top + 0.5 * (tableRow.height) - canvasRect.top
                 };
 
-                const line = new Konva.Line({
-                    points: [spanBottomRight.x, spanBottomRight.y + titleRect.height, annLeftMiddle.x, annLeftMiddle.y + titleRect.height],
-                    stroke: this.getAnnotationColour(id),
+
+                const line = new Line({
+                    points: [spanBottomRight.x, spanBottomRight.y, annLeftMiddle.x, annLeftMiddle.y],
+                    stroke: getAnnotationColour(id),
                     strokeWidth: 2,
-                    dash: [5, 15]
+                    dash: [5, 15],
+                    opacity: id != 0 ? 0.5 : 1
                 });
-                this.layer.add(line);
+                shapesToAdd.push(line);
                 this.annLines.push({annId: id, line: line});
             }
         }
-
-        this.updateCanvas();
+        return shapesToAdd;
 
     }
 
-    updateCanvas() {
+    private showDocumentNumbers(span: HTMLSpanElement, prev: HTMLSpanElement) {
+        if (span.dataset.ids) { // if annotated
+
+            const ids: number[] = this.getAnnotationIdsFromElement(span);
+            let prevIds = [];
+            if (prev)
+                prevIds = this.getAnnotationIdsFromElement(prev);
+
+            if (ids.length > 0) {
+                if (ids.sort().join(',') != prevIds.sort().join(',')) {
+                    $(span).attr('data-before', ids.map(i => this.annotationNumbers[i]).sort((a, b) => a - b).join(","));
+                }
+
+                if (!$(span).hasClass("highlighted"))
+                    $(span).addClass("highlighted");
+
+                return;
+            }
+        }
+        Annotator.hideDocumentNumbers(span);
+    }
+
+    private static hideDocumentNumbers(span: HTMLSpanElement) {
+        $(span).attr('data-before', "");
+        if ($(span).hasClass("highlighted"))
+            $(span).removeClass("highlighted");
+    }
+
+    private static convertRemToPixels(rem: number): number {
+        return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    }
+
+    private getBracketStatus(span: HTMLSpanElement, newId: number): BracketStatus {
+        let prevGroup, prevWord, nextGroup, nextWord = 0;
+        let start, end = false;
+        let [groupNo, wordNo] = this.getHighlightIds(span);
+
+        if (wordNo == 0 && groupNo == 0) {
+
+            start = true;
+        } else if (wordNo == 0) {
+            prevWord = -1;
+            prevGroup = groupNo - 1;
+        } else {
+            prevGroup = groupNo;
+            prevWord = wordNo - 1;
+        }
+
+        const maxWords = this.getHighlightIds($(span).parent().children(":last")[0])[1];
+        const maxGroups = this.getHighlightIds($(this.contentCtr).find("span").last()[0])[0];
+        if (maxWords - wordNo == 0 && groupNo == maxGroups) {
+            end = true;
+        } else if (maxWords - wordNo == 0) {
+            nextWord = 0;
+            nextGroup = groupNo + 1;
+        } else {
+            nextGroup = groupNo;
+            nextWord = wordNo + 1;
+        }
+
+        let isNextHighlighted = Annotator.isWordHighlighted(nextGroup, nextWord, newId);
+        let isPrevHighlighted = Annotator.isWordHighlighted(prevGroup, prevWord, newId);
+
+        // ends at the end of this <span> 
+        if (!isNextHighlighted) {
+            end = true;
+        }
+
+        // starts at the start of this <span> 
+        if (!isPrevHighlighted) {
+            start = true;
+        }
+        if (start && end)
+            return BracketStatus.Single;
+        if (start)
+            return BracketStatus.Start;
+        if (end)
+            return BracketStatus.End;
+        return BracketStatus.Middle;
+
+    }
+
+
+    private updateCanvas() {
         this.layer.draw();
-        this.stage.draw();
     }
 
-    onResize() {
+    private onResize() {
         this.stage.setWidth(this.contentCtr.clientWidth);
         this.stage.setHeight(this.contentCtr.clientHeight);
-        this.drawLines();
+        this.draw();
 
     }
 
-    addCanvasHandlers() {
+    public addCanvasHandlers() {
         $(this.annCtr).find("tr[id*=ann]").each((i: number, el: HTMLElement) => {
             const id = parseInt(el.dataset.annId, 10);
             $(el).hover(
                 () => {
-                    this.annLines.filter(l => l.annId === id).forEach(x => x.line.dash([10, 0]));
+                    this.annLines.filter(l => l.annId === id).forEach(x => {
+                        x.line.dash([10, 0]);
+                        x.line.opacity(100);
+                    });
                     this.updateCanvas();
                 },
                 () => {
-                    this.annLines.filter(l => l.annId === id).forEach(x => x.line.dash([5, 15]));
+                    this.annLines.filter(l => l.annId === id).forEach(x => {
+                        x.line.dash([5, 15]);
+                        x.line.opacity(50);
+                    });
                     this.updateCanvas();
                 });
         });
@@ -206,20 +459,37 @@ export class Annotator {
             () => {
                 this.onResize();
             });
+        // @ts-ignore
+        window.onbeforeprint = (r) => {
+            console.log(r);
+            this.colouredMode = false;
+            this.onResize();
+        };
+        // @ts-ignore
+        window.onafterprint = (r) => {
+            console.log(r);
+            this.colouredMode = window.localStorage.getItem("displayMode") != "lines";
+            this.onResize();
+        };
+        $("#colouredModeToggle").on('click', () => {
+            this.colouredMode = !this.colouredMode;
+            if (this.colouredMode) {
+                window.localStorage.setItem("displayMode", "colours");
+            } else {
+                window.localStorage.setItem("displayMode", "lines");
+            }
+            this.draw();
+
+        });
     }
 
+// Helper functions ====================================================================================================
 
-// Helper functions ================================================================================================
-
-    isAnnotationBeingEdited(annId): boolean {
-        return this.annBeingEdited == annId;
-    }
-
-    getAnnotation(id: number): Annotation {
+    private getAnnotation(id: number): Annotation {
         return this.annotations.find(x => x.annotationId == id);
     }
 
-    getAnnotationIndex(id: number): number {
+    private getAnnotationIndex(id: number): number {
         for (let i = 0; i < this.annotations.length; i++) {
             if (this.annotations[i].annotationId == id) {
                 return i;
@@ -228,29 +498,21 @@ export class Annotator {
         return -1;
     }
 
-    deleteAnnotation(id: number) {
-        for (let i = 0; i < this.annotations.length; i++) {
-            if (this.annotations[i].annotationId == id) {
-                this.annotations.splice(i, 1);
-                return;
-            }
-        }
-    }
 
-    getAnnotationColour(id: number): string {
-        return this.annColours[id];
-    }
+// Handlers ============================================================================================================
 
-// Handlers ========================================================================================================
-    addEditHandlers() {
+    public addEditHandlers() {
         $(this.annCtr).on('click',
             '.ann-edit-save',
             (e) => {
                 let {annId: id} = $(e.currentTarget).closest("tr").data();
                 this.readAnnotationFromForm(id);
-                this.updateAnnotation(id);
+                this.updateAnnotation(id, false).then((annotation: Annotation) => {
+                    this.annBeingEdited = 0;
+                    this.updateHighlightsByAnnotation(annotation.annotationId);
+                });
                 this.setEditingStatus(id, false);
-                this.drawLines();
+                this.draw();
             });
         $(this.annCtr).on('click',
             '.ann-edit-cancel',
@@ -259,7 +521,7 @@ export class Annotator {
                 this.annBeingEdited = 0;
                 this.setEditingStatus(id, false);
                 this.resetHighlights();
-                this.drawLines();
+                this.draw();
             });
 
         $(this.annCtr).on('click',
@@ -267,11 +529,11 @@ export class Annotator {
             (e) => {
                 let {annId: id} = $(e.currentTarget).closest("tr").data();
                 this.annBeingEdited = 0;
-                this.deleteAnnotationFromServer(id, false).then((res) => {
-                    this.removeTableRow(id);
+                Annotator.deleteAnnotationFromServer(id, false).then(() => {
+                    Annotator.removeTableRow(id);
                     this.removeHighlightsByAnnotation(id);
                     this.resetHighlights();
-                    this.drawLines();
+                    this.draw();
                 });
 
 
@@ -295,74 +557,62 @@ export class Annotator {
 
                 this.annBeingEdited = id;
                 this.setEditingStatus(id, true);
-                this.drawLines();
+                this.draw();
 
             });
 
 
         $(this.annCtr).on('click',
             '.ann-new-save',
-            (e) => {
+            () => {
                 let ann: Annotation = this.getAnnotation(0);
 
                 const annDiv: JQuery<HTMLElement> = $(`.newAnnotationRow`);
                 ann.body = <string>annDiv.find(`.annBody`).val();
                 ann.title = <string>annDiv.find(`.annTitle`).val();
 
-                this.clearNewAnnotationForm();
+                Annotator.clearNewAnnotationForm();
                 const promise = this.saveNewAnnotation(ann, false);
                 promise.then((annotation: Annotation) => {
-                    this.annotations[this.getAnnotationIndex(0)] = annotation;
+                    this.annotations[this.getAnnotationIndex(0)] = annotation; // also sets id
                     this.annotations.push(new Annotation([], "", "", 0, this.docAnnId));
                     this.annBeingEdited = 0;
-
-                    var id = annotation.annotationId;
-                    this.getAnnotationColourFromServer(id).then((data) => {
-                        this.annClasses[id] = data.colourClassName;
-                        this.annColours[id] = data.colour;
-                        this.updateHighlightsByAnnotation(id);
-                        this.addTableRow(annotation);
-                        this.drawLines();
-                        this.drawLines();
-                    })
-
+                    this.updateHighlightsByAnnotation(annotation.annotationId);
+                    this.addTableRow(annotation);
+                    this.draw();
                 })
-
-
             });
         $(this.annCtr).on('click',
             '.ann-new-cancel',
-            (e) => {
-                this.clearNewAnnotationForm();
+            () => {
+                Annotator.clearNewAnnotationForm();
                 this.resetHighlights();
-                this.drawLines();
+                this.draw();
             });
 
 
-        $(this.contentCtr).on('click',
+        $(this.document).on('click',
             '.word',
             null,
             (e: JQuery.Event) => {
-                console.log(this.annBeingEdited);
                 this.onWordClick(e);
-                this.drawLines();
-                console.log("Drawn lines")
+                this.draw();
             });
+
     }
 
+// Table UI management =================================================================================================
 
-// Table UI management ==============================================================================================
-
-    setEditingStatus(annotationId: number, editing: boolean) {
+    private setEditingStatus(annotationId: number, editing: boolean) {
         const element = document.getElementById(`annotation${annotationId}`);
         const ann = this.getAnnotation(annotationId);
         if (editing) {
             element.innerHTML = `
-            <td style="background-color: ${this.getAnnotationColour(annotationId)}"></td>
+            <td style="background-color: ${getAnnotationColour(annotationId)}"></td>
                         <td><input type="text" class="form-control annTitle" placeholder="Annotation Title"
                    value="${ann.title}"></td>
                         <td>
-                           <textarea rows="5" placeholder="Your annotation" class="form-control annBody">${ann.body}</textarea>
+                           <textarea rows="2" placeholder="Your annotation" class="form-control annBody">${ann.body}</textarea>
                         </td>
                         <td>
                             <button class="btn btn-primary ann-edit-save">Save</button>
@@ -370,37 +620,43 @@ export class Annotator {
                             <button class="btn btn-outline-danger ann-edit-cancel">Cancel</button>
                         </td>`
         } else {
-            element.innerHTML = `<td style="background-color: ${this.getAnnotationColour(annotationId)}"></td>
+            element.innerHTML = `<td style="background-color: ${getAnnotationColour(annotationId)}"></td>
                         <td>${ann.title}</td>
                         <td>
-                            <p>${ann.body}</p>
+                            <span class="annotation-text">${ann.body}</span>
                         </td>
                         <td>
-                            <a class="annotationEditLink btn btn-light">Edit</a>
+                            <a href="#" class="annotationEditLink">Edit</a>
                         </td>`
         }
 
     }
 
-    addTableRow(ann: Annotation) {
+    private addTableRow(ann: Annotation) {
         let tableBody = $("#annotationTable > tbody");
-        tableBody.append(`<tr id="annotation${ann.annotationId}" data-ann-id="${ann.annotationId}"><td style="background-color: ${this.getAnnotationColour(ann.annotationId)}"></td>
+        tableBody.append(`<tr id="annotation${ann.annotationId}" data-ann-id="${ann.annotationId}">
+        <td style="background-color: ${this.colouredMode ? getAnnotationColour(ann.annotationId) + "!important" : ""}"></td>
                         <td>${ann.title}</td>
                         <td>
-                            <p>${ann.body}</p>
+                            <span class="annotation-text">${ann.body}</span>
                         </td>
                         <td>
-                            <a class="annotationEditLink btn btn-light">Edit</a>
-                        </td></tr>`)
+                            <a href="#" class="annotationEditLink">Edit</a>
+                        </td></tr>`);
+        if (!this.colouredMode) {
+            this.showTableAnnotationNumbers();
+        } else {
+            this.hideTableAnnotationNumbers();
+        }
     }
 
-    removeTableRow(annotationId: number) {
+    private static removeTableRow(annotationId: number) {
         let row = $(`#annotationTable > tbody > tr#annotation${annotationId}`);
         row.remove();
     }
 
     // update to user input
-    readAnnotationFromForm(annotationId: number) {
+    private readAnnotationFromForm(annotationId: number) {
         let ann: Annotation = this.getAnnotation(annotationId);
         let listIndex = this.annotations.indexOf(ann);
         const annDiv: JQuery<HTMLElement> = $(`#annotation${annotationId}`);
@@ -409,15 +665,39 @@ export class Annotator {
         this.annotations[listIndex] = ann;
     }
 
-    clearNewAnnotationForm() {
+    private static clearNewAnnotationForm() {
         const annDiv: JQuery<HTMLElement> = $(`.newAnnotationRow`);
         annDiv.find(`.annBody`).val("");
         annDiv.find(`.annTitle`).val("");
     }
 
-// Highlight management ============================================================================================
+    // display numbers in front of each annotation (from 1 to n, rather than annotation ids) for use in print format/
+    // colourless mode
+    private showTableAnnotationNumbers() {
+        let rows = $("#annotationTable >tbody > tr, #annotationTable > tfoot > tr");
+        rows.each((i: number, el: HTMLTableRowElement) => {
+            let colouredCell = <HTMLTableCellElement>el.cells[0];
+            colouredCell.style.backgroundColor = "";
+            colouredCell.textContent = `${i + 1}`;
+            this.annotationNumbers[parseInt(el.dataset.annId)] = i + 1;
+        })
+    }
+
+    // hide numbers for coloured mode, and show the colours instead
+    private hideTableAnnotationNumbers() {
+        let rows = $("#annotationTable >tbody > tr, #annotationTable > tfoot > tr");
+        rows.each((i: number, el: HTMLTableRowElement) => {
+            let colouredCell = <HTMLTableCellElement>el.cells[0];
+            colouredCell.style.cssText = `background-color: ${getAnnotationColour(parseInt(el.dataset.annId))} !important`;
+            colouredCell.textContent = "";
+        })
+    }
+
+
+// Highlight management ================================================================================================
 
     private GetHighlightIndex(list: Highlight[], highlight: Highlight) {
+        // @ts-ignore
         return list.findIndex(
             h => h.location.bookNumber == highlight.location.bookNumber &&
                 h.location.sectionNumber == highlight.location.sectionNumber &&
@@ -427,17 +707,15 @@ export class Annotator {
 
     // handler that runs when a word is clicked on - if the word is already part of the current annotation, it is
     // removed, else it is added
-    onWordClick(event: JQuery.Event) {
+    private onWordClick(event: JQuery.Event) {
         let clickedElement = <HTMLElement>event.target;
 
         //update DOM
-        if (clickedElement.dataset.ids.indexOf(this.annBeingEdited.toString()) >= 0) {
-            console.log(this.annBeingEdited.toString());
+        if (clickedElement.dataset.ids.indexOf(`,${this.annBeingEdited.toString()},`) >= 0) {
             clickedElement.dataset.ids = clickedElement.dataset.ids.replace(this.annBeingEdited.toString(), '')
         } else {
-            clickedElement.dataset.ids += this.annBeingEdited.toString();
+            clickedElement.dataset.ids += this.annBeingEdited.toString() + ",";
         }
-        clickedElement.classList.toggle(this.annClasses[this.annBeingEdited]); // yellow highlight
 
         let [groupNum, wordNum] = this.getHighlightIds(clickedElement);
 
@@ -458,8 +736,7 @@ export class Annotator {
                 this.highlightsToAdd.splice(indexInToAdd, 1)
             }
 
-        }
-        else {
+        } else {
             let existingHighlight = currentAnn.highlights[highlightIndex];
 
             let indexInToRemove = this.GetHighlightIndex(this.highlightsToRemove, existingHighlight);
@@ -472,104 +749,52 @@ export class Annotator {
     }
 
     // remove highlighting from the text - used when an annotation is deleted.
-    removeHighlightsByAnnotation(id: number) {
-        $(this.contentCtr).find("span").each((i, span) => {
-            if (span.classList.contains(this.annClasses[id])) {
-                span.classList.toggle(this.annClasses[id]);
+    private removeHighlightsByAnnotation(id: number) {
+        $(this.document).find("span.word").each((i, span) => {
+            if (span.dataset.ids.indexOf("," + id.toString() + ",") >= 0) {
                 span.dataset.ids = span.dataset.ids.replace(id.toString(), '');
             }
         })
     }
 
     // update the highlighting in the text - used when an annotation is saved, so we can then display it with the right colour.
-    updateHighlightsByAnnotation(newId: number) {
-        $(this.contentCtr).find("span").each((i, span) => {
-            if (span.classList.contains("annH1")) {
-                var newClass = this.annClasses[newId];
-
-                if (newClass == "annB1" || newClass == "annB2") {
-                    // brackets need special handling
-
-                    let prevGroup, prevWord, nextGroup, nextWord = 0;
-                    let [groupNo, wordNo] = this.getHighlightIds(span);
-
-                    if (wordNo == 0 && groupNo == 0) {
-
-                        newClass += "Start"
-                    } else if (wordNo == 0) {
-                        prevWord = -1;
-                        prevGroup = groupNo - 1;
-                    } else {
-                        prevGroup = groupNo;
-                        prevWord = wordNo - 1;
-                    }
-
-                    var maxWords = this.getHighlightIds($(span).siblings(":last"))[1];
-                    var maxGroups = this.getHighlightIds($(this.contentCtr).find("span").last())[0]
-                    if (maxWords - wordNo == 1 && groupNo == maxGroups) {
-                        newClass += "End";
-                    } else if (maxWords - wordNo === 1) {
-                        nextWord = 0;
-                        nextGroup = groupNo + 1;
-                    } else {
-                        nextGroup = groupNo;
-                        nextWord = wordNo + 1;
-                    }
-
-                    var isNextHighlighted = this.isWordHighlighted(nextGroup, nextWord, newId);
-                    var isPrevHighlighted = this.isWordHighlighted(prevGroup, prevWord, newId);
-
-                    // ends at the end of this <span> 
-                    if (!isNextHighlighted) {
-                        newClass += "End";
-                    }
-
-                    // starts at the start of this <span> 
-                    if (!isPrevHighlighted) {
-                        newClass += "Start";
-                    }
-
-                    // goes straight through this <span>
-                    if (isPrevHighlighted && isNextHighlighted) {
-                        newClass += "Middle";
-                    }
-                    span.classList.add(newClass);
-                } else {
-                    span.classList.add(this.annClasses[newId]);
-                }
-                span.classList.remove("annH1");
-                span.dataset.ids = span.dataset.ids.replace("0", newId.toString())
+    private updateHighlightsByAnnotation(newId: number) {
+        $(this.document).find("span.word").each((i, span) => {
+            if (span.dataset.ids.indexOf(",0,") >= 0) {
+                span.dataset.ids = span.dataset.ids.replace(",0,", `,${newId.toString()},`)
             }
         });
 
     }
 
-    private getHighlightIds(span) {
+    private getHighlightIds(span: HTMLSpanElement) {
         return span.id.split("-").map(x => parseInt(x, 10));
     }
 
-    private isWordHighlighted(groupNo: number, wordNo: number, annId: number) {
-        var span = $(`.${groupNo}-${wordNo}`);
-        return span.data("ids").indexOf(annId.toString()) >= 0;
+    private static isWordHighlighted(groupNo: number, wordNo: number, annId: number): boolean {
+        const span = $(`[id=${groupNo}-${wordNo}]`);
+        const data = span.data("ids");
+        if (isNullOrUndefined(data)) {
+            return false;
+        }
+        return data.indexOf(`,${annId.toString()},`) >= 0;
     }
 
 // remove highlighting from the text - used when an annotation is deleted.
-    removeHighlight(highlight: Highlight) {
-        $(this.contentCtr).find(`#${highlight.location.groupNumber}-${highlight.location.wordNumber}`).each((i, p) => {
-            p.classList.toggle(this.annClasses[highlight.annotationId]);
+    private removeHighlight(highlight: Highlight) {
+        $(this.document).find(`#${highlight.location.groupNumber}-${highlight.location.wordNumber}`).each((i, p) => {
             p.dataset.ids = p.dataset.ids.replace(highlight.annotationId.toString(), '');
         });
     }
 
     // remove highlighting from the text - used when an annotation is deleted.
-    addHighlight(highlight: Highlight) {
-        $(this.contentCtr).find(`#${highlight.location.groupNumber}-${highlight.location.wordNumber}`).each((i, p) => {
-            p.classList.toggle(this.annClasses[highlight.annotationId]);
-            p.dataset.ids += highlight.annotationId.toString();
+    private addHighlight(highlight: Highlight) {
+        $(this.document).find(`#${highlight.location.groupNumber}-${highlight.location.wordNumber}`).each((i, p) => {
+            p.dataset.ids += " " + highlight.annotationId.toString() + " ";
         });
     }
 
-    resetHighlights() {
+    private resetHighlights() {
         for (let i = 0; i < this.highlightsToAdd.length; i++) {
             this.removeHighlight(this.highlightsToAdd[i]);
         }
@@ -578,56 +803,48 @@ export class Annotator {
         }
     }
 
-// save to server ==================================================================================================
+// Server persistence ==================================================================================================
 
-    saveNewAnnotation(annotation: Annotation, reload = true): Promise<object> {
+    private saveNewAnnotation(annotation: Annotation, reload = true): Promise<Annotation> {
         // add new highlights too
-        let p: Promise<object> = axios.post<object>("/api/Annotations", {
+        return axios.post<Annotation>("/api/Annotations", {
             annotation: annotation,
             highlightsToAdd: this.highlightsToAdd
         }).then(
-            (res): object => {
+            (res): Annotation => {
                 // reload page
                 if (reload) {
                     window.location.reload(true);
                 }
-                console.log(res);
                 this.highlightsToAdd = [];
 
                 // @ts-ignore
                 return res.data.annotation;
             });
-        return p;
     }
 
-    updateAnnotation(annotationId: number, reload = true) {
+    private updateAnnotation(annotationId: number, reload = true): Promise<Annotation> {
         let annotation = this.getAnnotation(annotationId);
         annotation.highlights = [];
-        let ann = axios.put(`/api/Annotations/${annotationId}`,
+        return axios.put<Annotation>(`/api/Annotations/${annotationId}`,
             {
                 annotation: annotation,
                 highlightsToAdd: this.highlightsToAdd,
                 highlightsToRemove: this.highlightsToRemove
-            });
-        ann.then(
-            () => {
+            }).then(
+            (res): Annotation => {
                 // reload page
                 if (reload) {
                     window.location.reload(true);
                 }
                 this.highlightsToAdd = [];
                 this.highlightsToRemove = [];
+                // @ts-ignore
+                return res.data.annotation;
             });
-        return ann;
     }
 
-    deleteAnnotationFromServer(annotationId: number, reload = true) {
+    private static deleteAnnotationFromServer(annotationId: number, reload = true) {
         return axios.delete(`/api/Annotations/${annotationId}`)
     }
-
-    getAnnotationColourFromServer(annotationId: number) {
-        return axios.get(`/api/Annotations/${annotationId}/Colour`).then((res) => res.data);
-    }
-
-
 }
