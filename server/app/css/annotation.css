@@ -15,7 +15,16 @@ span.word.highlightEnd:before {
 }
 
 .annotation-text {
-    white-space: pre-wrap;
+    /*white-space: pre-wrap;*/
+}
+
+.annotationEditLink {
+    cursor: pointer;
+    color: #0000ff;
+}
+
+ul {
+    padding-left: 1rem;
 }
 
 /* Layout - two columns on large screens, 1 on smaller screens*/

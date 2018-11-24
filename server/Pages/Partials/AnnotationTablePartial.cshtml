@@ -22,12 +22,12 @@
             <td style="background-color: @Model.AnnotationColour[ann.AnnotationId] !important" class="annotationTableColour"></td>
             <td>@ann.Title</td>
             <td>
-                <span class="annotation-text">@ann.Body</span>
+                <span class="annotation-text" data-raw="@ann.Body"></span>
             </td>
             @if (Model.IsEditable)
             {
                 <td class="button-cell">
-                    <a href="#"class="annotationEditLink">Edit</a>
+                    <span class="annotationEditLink">Edit</span>
                 </td>
             }
         </tr>

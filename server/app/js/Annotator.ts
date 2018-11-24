@@ -1,8 +1,9 @@
 import {Layer, Line, Node, Rect, Stage} from 'konva';
 import axios from 'axios'
+import * as showdown from 'showdown'
 import * as $ from 'jquery'
 import {Annotation, Highlight, Place} from "./AnnotationTypes";
-import {isNull, isNullOrUndefined} from "util";
+import {isNullOrUndefined} from "util";
 import {getAnnotationColour, getHighlightingData, HighlightType} from './colours'
 
 class LineInfo {
@@ -86,6 +87,8 @@ export class Annotator {
 
             this.colouredMode = window.localStorage.getItem("displayMode") != "lines";
         }
+
+        this.displayMarkdownOnAllRows();
     }
 
     // Canvas management ===============================================================================================
@@ -599,6 +602,26 @@ export class Annotator {
                 this.draw();
             });
 
+
+        $(document).on('keydown', '.annBody', function (e) {
+            const keyCode = e.keyCode || e.which;
+
+            if (keyCode == 9) {
+                e.preventDefault();
+                let t = (<HTMLTextAreaElement>this);
+                const start = t.selectionStart;
+                const end = t.selectionEnd;
+
+                // set textarea value to: text before caret + tab + text after caret
+                $(this).val($(this).val().toString().substring(0, start)
+                    + "    "
+                    + $(this).val().toString().substring(end));
+
+                // put caret at right position again
+                t.selectionStart =
+                    t.selectionEnd = start + 4;
+            }
+        });
     }
 
 // Table UI management =================================================================================================
@@ -623,10 +646,10 @@ export class Annotator {
             element.innerHTML = `<td style="background-color: ${getAnnotationColour(annotationId)}"></td>
                         <td>${ann.title}</td>
                         <td>
-                            <span class="annotation-text">${ann.body}</span>
+                            <span class="annotation-text">${new showdown.Converter().makeHtml(ann.body)}</span>
                         </td>
                         <td>
-                            <a href="#" class="annotationEditLink">Edit</a>
+                            <span class="annotationEditLink">Edit</span>
                         </td>`
         }
 
@@ -638,10 +661,10 @@ export class Annotator {
         <td style="background-color: ${this.colouredMode ? getAnnotationColour(ann.annotationId) + "!important" : ""}"></td>
                         <td>${ann.title}</td>
                         <td>
-                            <span class="annotation-text">${ann.body}</span>
+                            <span class="annotation-text">${new showdown.Converter().makeHtml(ann.body)}</span>
                         </td>
                         <td>
-                            <a href="#" class="annotationEditLink">Edit</a>
+                            <span class="annotationEditLink">Edit</span>
                         </td></tr>`);
         if (!this.colouredMode) {
             this.showTableAnnotationNumbers();
@@ -693,6 +716,17 @@ export class Annotator {
         })
     }
 
+    private displayMarkdownOnAllRows() {
+        let rows = $("#annotationTable >tbody > tr");
+        let converter = new showdown.Converter();
+        rows.each((i: number, el: HTMLTableRowElement) => {
+            let textCell = <HTMLSpanElement>el.cells[2].firstElementChild;
+            let text = $(textCell).data("raw");
+            textCell.innerHTML = converter.makeHtml(text);
+            console.log(el.cells[2].firstElementChild)
+        })
+    }
+    
 
 // Highlight management ================================================================================================
 
