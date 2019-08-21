@@ -19,8 +19,6 @@ namespace DocumentAnnotation.TextLoader
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="text"></param>
-        /// 
         /// <param name="book"></param>
         /// <param name="section"></param>
         /// <returns>A <see cref="Text"/> containing only the requested book/section</returns>

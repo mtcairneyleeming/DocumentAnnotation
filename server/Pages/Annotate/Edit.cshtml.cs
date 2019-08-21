@@ -31,7 +31,7 @@ namespace DocumentAnnotation.Pages.Annotate
         public Book Book => Text.Books[BookNum];
         public Section Section => Book.Sections[SectionNum];
         public List<Group> Groups => Section.Groups;
-        public Models.Document DocAnn { get; private set; }
+        public Document DocAnn { get; private set; }
 
         public Annotator.Annotator Annotator { get; private set; }
 

@@ -8,11 +8,11 @@ namespace DocumentAnnotation.Pages
     [AllowAnonymous]
     public class IndexModel : PageModel
     {
-        public readonly AnnotationContext _context;
+        public readonly AnnotationContext Context;
 
         public IndexModel(AnnotationContext context, UserManager<AppUser> userManager)
         {
-            _context = context;
+            Context = context;
             UserManager = userManager;
         }
 

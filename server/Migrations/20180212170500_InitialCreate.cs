@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DocumentAnnotation.Migrations
@@ -9,21 +8,21 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "DocumentAnnotations",
-                columns: table => new
+                "DocumentAnnotations",
+                table => new
                 {
-                    DocumentAnnotationId = table.Column<int>(nullable: false)
+                    DocumentAnnotationId = table.Column<int>()
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
-                    TextId = table.Column<int>(nullable: false),
+                    TextId = table.Column<int>(),
                     UserId = table.Column<string>(nullable: true)
                 },
                 constraints: table => { table.PrimaryKey("PK_DocumentAnnotations", x => x.DocumentAnnotationId); });
 
             migrationBuilder.CreateTable(
-                name: "Texts",
-                columns: table => new
+                "Texts",
+                table => new
                 {
-                    TextId = table.Column<int>(nullable: false)
+                    TextId = table.Column<int>()
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Abbreviation = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true)
@@ -31,79 +30,79 @@ namespace DocumentAnnotation.Migrations
                 constraints: table => { table.PrimaryKey("PK_Texts", x => x.TextId); });
 
             migrationBuilder.CreateTable(
-                name: "Annotations",
-                columns: table => new
+                "Annotations",
+                table => new
                 {
-                    AnnotationId = table.Column<int>(nullable: false)
+                    AnnotationId = table.Column<int>()
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Body = table.Column<string>(nullable: true),
-                    DocumentAnnotationId = table.Column<int>(nullable: false),
+                    DocumentAnnotationId = table.Column<int>(),
                     Title = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Annotations", x => x.AnnotationId);
                     table.ForeignKey(
-                        name: "FK_Annotations_DocumentAnnotations_DocumentAnnotationId",
-                        column: x => x.DocumentAnnotationId,
-                        principalTable: "DocumentAnnotations",
-                        principalColumn: "DocumentAnnotationId",
+                        "FK_Annotations_DocumentAnnotations_DocumentAnnotationId",
+                        x => x.DocumentAnnotationId,
+                        "DocumentAnnotations",
+                        "DocumentAnnotationId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Highlights",
-                columns: table => new
+                "Highlights",
+                table => new
                 {
-                    HighlightId = table.Column<int>(nullable: false)
+                    HighlightId = table.Column<int>()
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
-                    AnnotationId = table.Column<int>(nullable: false),
-                    End_BookNumber = table.Column<int>(nullable: false),
-                    End_Character = table.Column<int>(nullable: false),
-                    End_GroupNumber = table.Column<int>(nullable: false),
-                    End_LocationId = table.Column<int>(nullable: false),
-                    End_SectionNumber = table.Column<int>(nullable: false),
-                    Start_BookNumber = table.Column<int>(nullable: false),
-                    Start_Character = table.Column<int>(nullable: false),
-                    Start_GroupNumber = table.Column<int>(nullable: false),
-                    Start_LocationId = table.Column<int>(nullable: false),
-                    Start_SectionNumber = table.Column<int>(nullable: false)
+                    AnnotationId = table.Column<int>(),
+                    End_BookNumber = table.Column<int>(),
+                    End_Character = table.Column<int>(),
+                    End_GroupNumber = table.Column<int>(),
+                    End_LocationId = table.Column<int>(),
+                    End_SectionNumber = table.Column<int>(),
+                    Start_BookNumber = table.Column<int>(),
+                    Start_Character = table.Column<int>(),
+                    Start_GroupNumber = table.Column<int>(),
+                    Start_LocationId = table.Column<int>(),
+                    Start_SectionNumber = table.Column<int>()
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Highlights", x => x.HighlightId);
                     table.ForeignKey(
-                        name: "FK_Highlights_Annotations_AnnotationId",
-                        column: x => x.AnnotationId,
-                        principalTable: "Annotations",
-                        principalColumn: "AnnotationId",
+                        "FK_Highlights_Annotations_AnnotationId",
+                        x => x.AnnotationId,
+                        "Annotations",
+                        "AnnotationId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Annotations_DocumentAnnotationId",
-                table: "Annotations",
-                column: "DocumentAnnotationId");
+                "IX_Annotations_DocumentAnnotationId",
+                "Annotations",
+                "DocumentAnnotationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Highlights_AnnotationId",
-                table: "Highlights",
-                column: "AnnotationId");
+                "IX_Highlights_AnnotationId",
+                "Highlights",
+                "AnnotationId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Highlights");
+                "Highlights");
 
             migrationBuilder.DropTable(
-                name: "Texts");
+                "Texts");
 
             migrationBuilder.DropTable(
-                name: "Annotations");
+                "Annotations");
 
             migrationBuilder.DropTable(
-                name: "DocumentAnnotations");
+                "DocumentAnnotations");
         }
     }
 }

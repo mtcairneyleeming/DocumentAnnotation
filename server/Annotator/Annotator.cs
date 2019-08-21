@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DocumentAnnotation.Models;
 using DocumentAnnotation.TextLoader;
-using Npgsql.TypeHandlers;
 
 namespace DocumentAnnotation.Annotator
 {
@@ -10,7 +9,7 @@ namespace DocumentAnnotation.Annotator
     {
         public Annotator(List<Annotation> annotations, List<Group> groups)
         {
-            Annotations = annotations.Where(a => a.Highlights.Count > 0).OrderBy(a => a.Highlights.Last().Location).ToList();
+            Annotations = annotations.Where(a => a.Highlights.Count > 0).OrderBy(a => a.Highlights.First().Location).ToList();
             Annotations.AddRange(annotations.Where(a => a.Highlights.Count == 0));
             Groups = groups;
             GenerateHighlightData();
@@ -20,20 +19,9 @@ namespace DocumentAnnotation.Annotator
 
         // inputs
         public List<Annotation> Annotations { get; }
-        private List<Group> Groups { get; }
+        public List<Group> Groups { get; }
 
 
-        // internal working 
-        /// <summary>
-        /// Map of highlight type to the initial used in the CSS class
-        /// </summary>
-        private Dictionary<HighlightType, string> HighlightInitials { get; } =
-            new Dictionary<HighlightType, string>
-            {
-                {HighlightType.Bracket, "B"},
-                {HighlightType.Underline, "U"},
-                {HighlightType.Highlight, "H"}
-            };
 
         private string[] UnderLineColours { get; } =
         {
@@ -123,13 +111,7 @@ namespace DocumentAnnotation.Annotator
                     return null;
             }
         }
-        
 
-        private (HighlightType, string) GetHighlightingData(int annId)
-        {
-            var data = GetAnnotationData(annId);
-            return (data.Item1, GetAnnotationColour(annId));
-        }
 
         /// <summary>
         /// Data to determine class, colour and the like for each annotation

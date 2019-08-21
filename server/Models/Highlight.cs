@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 
@@ -6,10 +5,6 @@ namespace DocumentAnnotation.Models
 {
     public class Highlight
     {
-        public Highlight()
-        {
-        }
-
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int HighlightId { get; set; }
 

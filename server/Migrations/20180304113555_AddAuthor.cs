@@ -7,16 +7,16 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "Author",
-                table: "Texts",
+                "Author",
+                "Texts",
                 nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Author",
-                table: "Texts");
+                "Author",
+                "Texts");
         }
     }
 }

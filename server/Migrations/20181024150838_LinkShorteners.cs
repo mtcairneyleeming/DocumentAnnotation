@@ -8,13 +8,13 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "LinkShorteners",
-                columns: table => new
+                "LinkShorteners",
+                table => new
                 {
-                    LinkShortenerId = table.Column<int>(nullable: false)
+                    LinkShortenerId = table.Column<int>()
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
-                    ShortLink = table.Column<string>(nullable: false),
-                    OriginalLink = table.Column<string>(nullable: false)
+                    ShortLink = table.Column<string>(),
+                    OriginalLink = table.Column<string>()
                 },
                 constraints: table =>
                 {
@@ -25,7 +25,7 @@ namespace DocumentAnnotation.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "LinkShorteners");
+                "LinkShorteners");
         }
     }
 }

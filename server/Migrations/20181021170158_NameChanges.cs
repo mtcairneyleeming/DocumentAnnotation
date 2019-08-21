@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DocumentAnnotation.Migrations
 {
@@ -8,45 +7,45 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Annotations_DocumentAnnotations_DocumentAnnotationId",
-                table: "Annotations");
+                "FK_Annotations_DocumentAnnotations_DocumentAnnotationId",
+                "Annotations");
 
             migrationBuilder.DropIndex(
-                name: "IX_Annotations_DocumentAnnotationId",
-                table: "Annotations");
+                "IX_Annotations_DocumentAnnotationId",
+                "Annotations");
 
             migrationBuilder.RenameColumn(
-                name: "DocumentAnnotationId",
-                table: "DocumentAnnotations",
-                newName: "DocumentId");
+                "DocumentAnnotationId",
+                "DocumentAnnotations",
+                "DocumentId");
 
             migrationBuilder.AddColumn<string[]>(
-                name: "AllowedUsers",
-                table: "DocumentAnnotations",
+                "AllowedUsers",
+                "DocumentAnnotations",
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
-                name: "Visibility",
-                table: "DocumentAnnotations",
+                "Visibility",
+                "DocumentAnnotations",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.RenameColumn(
-                name: "DocumentAnnotationId",
+                "DocumentAnnotationId",
                 newName: "DocumentId",
                 table: "Annotations"
                 );
 
             migrationBuilder.CreateIndex(
-                name: "IX_Annotations_DocumentId",
-                table: "Annotations",
-                column: "DocumentId");
+                "IX_Annotations_DocumentId",
+                "Annotations",
+                "DocumentId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Annotations_DocumentAnnotations_DocumentId",
-                table: "Annotations",
-                column: "DocumentId",
-                principalTable: "DocumentAnnotations",
+                "FK_Annotations_DocumentAnnotations_DocumentId",
+                "Annotations",
+                "DocumentId",
+                "DocumentAnnotations",
                 principalColumn: "DocumentId",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -54,42 +53,42 @@ namespace DocumentAnnotation.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Annotations_DocumentAnnotations_DocumentId",
-                table: "Annotations");
+                "FK_Annotations_DocumentAnnotations_DocumentId",
+                "Annotations");
 
             migrationBuilder.DropIndex(
-                name: "IX_Annotations_DocumentId",
-                table: "Annotations");
+                "IX_Annotations_DocumentId",
+                "Annotations");
 
             migrationBuilder.DropColumn(
-                name: "AllowedUsers",
-                table: "DocumentAnnotations");
+                "AllowedUsers",
+                "DocumentAnnotations");
 
             migrationBuilder.DropColumn(
-                name: "Visibility",
-                table: "DocumentAnnotations");
+                "Visibility",
+                "DocumentAnnotations");
 
             migrationBuilder.RenameColumn(
-                name: "DocumentId",
+                "DocumentId",
                 newName: "DocumentAnnotationId",
                 table: "Annotations"
             );
 
             migrationBuilder.RenameColumn(
-                name: "DocumentId",
-                table: "DocumentAnnotations",
-                newName: "DocumentAnnotationId");
+                "DocumentId",
+                "DocumentAnnotations",
+                "DocumentAnnotationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Annotations_DocumentAnnotationId",
-                table: "Annotations",
-                column: "DocumentAnnotationId");
+                "IX_Annotations_DocumentAnnotationId",
+                "Annotations",
+                "DocumentAnnotationId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Annotations_DocumentAnnotations_DocumentAnnotationId",
-                table: "Annotations",
-                column: "DocumentAnnotationId",
-                principalTable: "DocumentAnnotations",
+                "FK_Annotations_DocumentAnnotations_DocumentAnnotationId",
+                "Annotations",
+                "DocumentAnnotationId",
+                "DocumentAnnotations",
                 principalColumn: "DocumentAnnotationId",
                 onDelete: ReferentialAction.Cascade);
         }

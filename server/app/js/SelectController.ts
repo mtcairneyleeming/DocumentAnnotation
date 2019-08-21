@@ -1,6 +1,6 @@
 // noinspection JSMethodCanBeStatic
 
-import { Text} from "./TextTypes"
+import { Text} from "./types/TextTypes"
 
 export class SelectController {
     constructor(bookId: string, sectionId: string, textNames: Text) {

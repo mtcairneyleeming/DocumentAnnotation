@@ -7,28 +7,28 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateIndex(
-                name: "IX_DocumentAnnotations_TextId",
-                table: "DocumentAnnotations",
-                column: "TextId");
+                "IX_DocumentAnnotations_TextId",
+                "DocumentAnnotations",
+                "TextId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DocumentAnnotations_UserId",
-                table: "DocumentAnnotations",
-                column: "UserId");
+                "IX_DocumentAnnotations_UserId",
+                "DocumentAnnotations",
+                "UserId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_DocumentAnnotations_Texts_TextId",
-                table: "DocumentAnnotations",
-                column: "TextId",
-                principalTable: "Texts",
+                "FK_DocumentAnnotations_Texts_TextId",
+                "DocumentAnnotations",
+                "TextId",
+                "Texts",
                 principalColumn: "TextId",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_DocumentAnnotations_AspNetUsers_UserId",
-                table: "DocumentAnnotations",
-                column: "UserId",
-                principalTable: "AspNetUsers",
+                "FK_DocumentAnnotations_AspNetUsers_UserId",
+                "DocumentAnnotations",
+                "UserId",
+                "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -36,20 +36,20 @@ namespace DocumentAnnotation.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_DocumentAnnotations_Texts_TextId",
-                table: "DocumentAnnotations");
+                "FK_DocumentAnnotations_Texts_TextId",
+                "DocumentAnnotations");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_DocumentAnnotations_AspNetUsers_UserId",
-                table: "DocumentAnnotations");
+                "FK_DocumentAnnotations_AspNetUsers_UserId",
+                "DocumentAnnotations");
 
             migrationBuilder.DropIndex(
-                name: "IX_DocumentAnnotations_TextId",
-                table: "DocumentAnnotations");
+                "IX_DocumentAnnotations_TextId",
+                "DocumentAnnotations");
 
             migrationBuilder.DropIndex(
-                name: "IX_DocumentAnnotations_UserId",
-                table: "DocumentAnnotations");
+                "IX_DocumentAnnotations_UserId",
+                "DocumentAnnotations");
         }
     }
 }

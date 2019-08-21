@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using DocumentAnnotation.Models;
 
-namespace server.Pages.Admin.LinkShorteners
+namespace DocumentAnnotation.Pages.Admin.LinkShorteners
 {
     public class DetailsModel : PageModel
     {
-        private readonly DocumentAnnotation.Models.AnnotationContext _context;
+        private readonly AnnotationContext _context;
 
-        public DetailsModel(DocumentAnnotation.Models.AnnotationContext context)
+        public DetailsModel(AnnotationContext context)
         {
             _context = context;
         }

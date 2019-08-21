@@ -7,32 +7,32 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "LastLocation_BookNumber",
-                table: "DocumentAnnotations",
+                "LastLocation_BookNumber",
+                "DocumentAnnotations",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<bool>(
-                name: "LastLocation_Exact",
-                table: "DocumentAnnotations",
+                "LastLocation_Exact",
+                "DocumentAnnotations",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<int>(
-                name: "LastLocation_GroupNumber",
-                table: "DocumentAnnotations",
+                "LastLocation_GroupNumber",
+                "DocumentAnnotations",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "LastLocation_SectionNumber",
-                table: "DocumentAnnotations",
+                "LastLocation_SectionNumber",
+                "DocumentAnnotations",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "LastLocation_WordNumber",
-                table: "DocumentAnnotations",
+                "LastLocation_WordNumber",
+                "DocumentAnnotations",
                 nullable: false,
                 defaultValue: 0);
         }
@@ -40,24 +40,24 @@ namespace DocumentAnnotation.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "LastLocation_BookNumber",
-                table: "DocumentAnnotations");
+                "LastLocation_BookNumber",
+                "DocumentAnnotations");
 
             migrationBuilder.DropColumn(
-                name: "LastLocation_Exact",
-                table: "DocumentAnnotations");
+                "LastLocation_Exact",
+                "DocumentAnnotations");
 
             migrationBuilder.DropColumn(
-                name: "LastLocation_GroupNumber",
-                table: "DocumentAnnotations");
+                "LastLocation_GroupNumber",
+                "DocumentAnnotations");
 
             migrationBuilder.DropColumn(
-                name: "LastLocation_SectionNumber",
-                table: "DocumentAnnotations");
+                "LastLocation_SectionNumber",
+                "DocumentAnnotations");
 
             migrationBuilder.DropColumn(
-                name: "LastLocation_WordNumber",
-                table: "DocumentAnnotations");
+                "LastLocation_WordNumber",
+                "DocumentAnnotations");
         }
     }
 }

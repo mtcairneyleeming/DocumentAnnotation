@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using DocumentAnnotation.Models;
 using DocumentAnnotation.TextLoader;
 using Microsoft.AspNetCore.Mvc;

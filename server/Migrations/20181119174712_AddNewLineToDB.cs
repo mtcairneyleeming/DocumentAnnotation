@@ -7,8 +7,8 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "AddNewLine",
-                table: "Texts",
+                "AddNewLine",
+                "Texts",
                 nullable: false,
                 defaultValue: false);
         }
@@ -16,8 +16,8 @@ namespace DocumentAnnotation.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "AddNewLine",
-                table: "Texts");
+                "AddNewLine",
+                "Texts");
         }
     }
 }

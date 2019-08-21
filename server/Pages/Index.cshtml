@@ -1,6 +1,6 @@
 ﻿@page
 @using DocumentAnnotation.Models
-@using DocumentAnnotation.Pages
+@using Microsoft.AspNetCore.Identity
 @model global::DocumentAnnotation.Pages.IndexModel
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
@@ -17,7 +17,7 @@
         <p class="lead">Use the lists below or the links to find the text/document you'd like.</p>
     </div>
 
-    var docsModel = new global::DocumentAnnotation.Pages.Documents.DocumentListModel(Model._context, Model.UserManager, Model.User);
+    var docsModel = new Documents.DocumentListModel(Model.Context, Model.UserManager, Model.User);
     await docsModel.OnGetAsync();
 
     @await Html.PartialAsync("Documents/DocumentList", docsModel)
@@ -25,7 +25,7 @@
     <hr/>
     <h4>Available Texts</h4>
 
-    var textsModel = new global::DocumentAnnotation.Pages.Texts.TextListModel(Model._context, Model.User);
+    var textsModel = new Texts.TextListModel(Model.Context, Model.User);
     await textsModel.OnGetAsync();
 
     @await Html.PartialAsync("Texts/TextList", textsModel)
@@ -47,7 +47,7 @@ else
     <h4>Texts available to read and annotate</h4>
     <p>(So far - more are being added)</p>
 
-    var textsModel = new global::DocumentAnnotation.Pages.Texts.TextListModel(Model._context, Model.User);
+    var textsModel = new Texts.TextListModel(Model.Context, Model.User);
     await textsModel.OnGetAsync();
 
     @await Html.PartialAsync("Texts/TextList", textsModel)

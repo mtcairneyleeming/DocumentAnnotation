@@ -1,5 +1,4 @@
 @page
-@using DocumentAnnotation.Pages.Documents
 @model DocumentAnnotation.Pages.Documents.IndexModel
 
 @{
@@ -12,7 +11,7 @@
     <a asp-page="Create">Create a new document</a>
 </p>
 @{
-    var docsModel = new global::DocumentAnnotation.Pages.Documents.DocumentListModel(Model._context, Model._userManager, Model.User);
+    var docsModel = new DocumentListModel(Model.Context, Model.UserManager, Model.User);
     await docsModel.OnGetAsync();
 }
 

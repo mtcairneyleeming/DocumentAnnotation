@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using DocumentAnnotation.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using Serilog;

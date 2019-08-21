@@ -12,8 +12,8 @@ namespace DocumentAnnotation.Pages.Documents
 {
     public class DocumentListModel : PageModel
     {
-        public readonly AnnotationContext _context;
-        public readonly UserManager<AppUser> _userManager;
+        private readonly AnnotationContext _context;
+        private readonly UserManager<AppUser> _userManager;
 
         public DocumentListModel(AnnotationContext context, UserManager<AppUser> userManager, ClaimsPrincipal user)
         {

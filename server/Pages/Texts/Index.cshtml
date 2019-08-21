@@ -1,5 +1,4 @@
 @page
-@using DocumentAnnotation.Pages.Texts
 @model DocumentAnnotation.Pages.Texts.IndexModel
 
 
@@ -15,7 +14,7 @@
     </p>
 }
 @{
-    var model = new TextListModel(Model._context, Model.User);
+    var model = new TextListModel(Model.Context, Model.User);
     await model.OnGetAsync();
 }
 @await Html.PartialAsync("Texts/TextList", model)

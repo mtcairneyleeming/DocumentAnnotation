@@ -1,5 +1,4 @@
 ﻿@page
-
 @using DocumentAnnotation.Extensions
 @using DocumentAnnotation.Pages.Partials
 @model DocumentAnnotation.Pages.Annotate.ViewModel
@@ -37,13 +36,13 @@
 
 
 <div id="container-fluid">
-    <div id="foregroundContainer">
-        <div id="documentContainer">
+    <div class="foregroundContainer">
+        <div class="documentContainer">
             @await Html.PartialAsync("Partials/AnnotatedTextPartial", new AnnotatedTextPartial(Model.Groups, Model.Annotator.GetIdsForAllWords(), Model.TextData.AddNewLine))
             @await Html.PartialAsync("Partials/TextNavigation")
         </div>
-        <div id="annotationContainer">
-            @await Html.PartialAsync("Partials/AnnotationTablePartial", new AnnotationTablePartial(Model.Annotator.Annotations, Model.Annotator.GetColoursForAllWords(), false))
+        <div class="annotationContainer">
+            @await Html.PartialAsync("Partials/AnnotationTablePartial", new AnnotationTablePartial(Model.Annotator.Annotations, Model.Annotator.GetColoursForAllWords()))
             <button class="btn btn-sm btn-secondary" id="colouredModeToggle">Toggle coloured mode</button>
             <hr/>
             @await Html.PartialAsync("Partials/TextDetails", new TextDetails(Model.TextData, Model.Book.Name, Model.Section.Name))

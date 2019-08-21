@@ -29,8 +29,7 @@ namespace DocumentAnnotation
 
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; set; }
-        private IHostingEnvironment CurrentEnvironment { get; set; }
+        public IConfigurationRoot Configuration { get; }
 
 
         public Startup(IHostingEnvironment env)
@@ -90,6 +89,7 @@ namespace DocumentAnnotation
             {
                 // allow anonymous access to view annotations and read texts
                 options.Conventions.AllowAnonymousToPage("/Annotate/View");
+                options.Conventions.AllowAnonymousToPage("/Annotate/Print");
                 
                 options.Conventions.AllowAnonymousToPage("/Texts/Index");
                 options.Conventions.AllowAnonymousToPage("/Texts/Details");
@@ -130,8 +130,6 @@ namespace DocumentAnnotation
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services, IOptions<Config> config)
         {
-            CurrentEnvironment = env;
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -18,7 +18,7 @@ namespace DocumentAnnotation.Pages.Documents
         }
 
         [BindProperty]
-        public Models.Document Document { get; set; }
+        public Document Document { get; set; }
 
         public IList<TextData> Texts { get; set; }
         public async Task<IActionResult> OnGetAsync(int? id)

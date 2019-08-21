@@ -37,12 +37,12 @@
 
 
 <div id="container-fluid">
-    <div id="foregroundContainer">
-        <div id="documentContainer">
+    <div class="foregroundContainer">
+        <div class="documentContainer">
             @await Html.PartialAsync("Partials/AnnotatedTextPartial", new AnnotatedTextPartial(Model.Groups, Model.Annotator.GetIdsForAllWords(), Model.TextData.AddNewLine))
             @await Html.PartialAsync("Partials/TextNavigation")
         </div>
-        <div id="annotationContainer">
+        <div class="annotationContainer">
             @await Html.PartialAsync("Partials/AnnotationTablePartial", new AnnotationTablePartial(Model.Annotator.Annotations, Model.Annotator.GetColoursForAllWords(), true))
             <button class="btn btn-sm btn-secondary" id="colouredModeToggle">Toggle coloured mode</button>
             <hr/>

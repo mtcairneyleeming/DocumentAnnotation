@@ -1,12 +1,11 @@
 @page
-@using DocumentAnnotation.Pages.Account.Manage
 @model DocumentAnnotation.Pages.Account.Manage.TwoFactorAuthenticationModel
 @{
     ViewData["Title"] = "Two-factor authentication (2FA)";
 }
 
 <h4>@ViewData["Title"]</h4>
-@if (Model.Is2faEnabled)
+@if (Model.Is2FaEnabled)
 {
     if (Model.RecoveryCodesLeft == 0)
     {

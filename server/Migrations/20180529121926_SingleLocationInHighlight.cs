@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections.Generic;
 
 namespace DocumentAnnotation.Migrations
 {
@@ -9,85 +7,85 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "End_BookNumber",
-                table: "Highlights");
+                "End_BookNumber",
+                "Highlights");
 
             migrationBuilder.DropColumn(
-                name: "End_GroupNumber",
-                table: "Highlights");
+                "End_GroupNumber",
+                "Highlights");
 
             migrationBuilder.DropColumn(
-                name: "End_SectionNumber",
-                table: "Highlights");
+                "End_SectionNumber",
+                "Highlights");
 
             migrationBuilder.DropColumn(
-                name: "End_WordNumber",
-                table: "Highlights");
+                "End_WordNumber",
+                "Highlights");
 
             migrationBuilder.RenameColumn(
-                name: "Start_WordNumber",
-                table: "Highlights",
-                newName: "Location_WordNumber");
+                "Start_WordNumber",
+                "Highlights",
+                "Location_WordNumber");
 
             migrationBuilder.RenameColumn(
-                name: "Start_SectionNumber",
-                table: "Highlights",
-                newName: "Location_SectionNumber");
+                "Start_SectionNumber",
+                "Highlights",
+                "Location_SectionNumber");
 
             migrationBuilder.RenameColumn(
-                name: "Start_GroupNumber",
-                table: "Highlights",
-                newName: "Location_GroupNumber");
+                "Start_GroupNumber",
+                "Highlights",
+                "Location_GroupNumber");
 
             migrationBuilder.RenameColumn(
-                name: "Start_BookNumber",
-                table: "Highlights",
-                newName: "Location_BookNumber");
+                "Start_BookNumber",
+                "Highlights",
+                "Location_BookNumber");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "Location_WordNumber",
-                table: "Highlights",
-                newName: "Start_WordNumber");
+                "Location_WordNumber",
+                "Highlights",
+                "Start_WordNumber");
 
             migrationBuilder.RenameColumn(
-                name: "Location_SectionNumber",
-                table: "Highlights",
-                newName: "Start_SectionNumber");
+                "Location_SectionNumber",
+                "Highlights",
+                "Start_SectionNumber");
 
             migrationBuilder.RenameColumn(
-                name: "Location_GroupNumber",
-                table: "Highlights",
-                newName: "Start_GroupNumber");
+                "Location_GroupNumber",
+                "Highlights",
+                "Start_GroupNumber");
 
             migrationBuilder.RenameColumn(
-                name: "Location_BookNumber",
-                table: "Highlights",
-                newName: "Start_BookNumber");
+                "Location_BookNumber",
+                "Highlights",
+                "Start_BookNumber");
 
             migrationBuilder.AddColumn<int>(
-                name: "End_BookNumber",
-                table: "Highlights",
+                "End_BookNumber",
+                "Highlights",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "End_GroupNumber",
-                table: "Highlights",
+                "End_GroupNumber",
+                "Highlights",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "End_SectionNumber",
-                table: "Highlights",
+                "End_SectionNumber",
+                "Highlights",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "End_WordNumber",
-                table: "Highlights",
+                "End_WordNumber",
+                "Highlights",
                 nullable: false,
                 defaultValue: 0);
         }

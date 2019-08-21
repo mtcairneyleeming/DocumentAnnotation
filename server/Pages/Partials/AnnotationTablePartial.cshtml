@@ -1,8 +1,8 @@
-@using DocumentAnnotation.Pages.Partials
+@using Markdig
 @model DocumentAnnotation.Pages.Partials.AnnotationTablePartial
 
 
-<table class="table table-sm table-striped table-borderless" id="annotationTable">
+<table class="table table-sm table-striped table-borderless annotationTable">
     <thead>
     <tr>
         <th style="width: 1%"></th>
@@ -22,7 +22,7 @@
             <td style="background-color: @Model.AnnotationColour[ann.AnnotationId] !important" class="annotationTableColour"></td>
             <td>@ann.Title</td>
             <td>
-                <span class="annotation-text" data-raw="@ann.Body"></span>
+                <span class="annotation-text" >@Html.Raw(Markdown.ToHtml(ann.Body))</span>
             </td>
             @if (Model.IsEditable)
             {
@@ -43,7 +43,7 @@
                        value="">
             </td>
             <td>
-                <textarea rows="2" placeholder="Your annotation" class="form-control annBody"></textarea>
+                <textarea rows="5" placeholder="Your annotation" class="form-control annBody"></textarea>
             </td>
             <td>
                 <button class="btn btn-sm btn-primary ann-new-save">Save</button>

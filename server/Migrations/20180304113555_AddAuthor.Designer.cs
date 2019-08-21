@@ -3,9 +3,9 @@
 using DocumentAnnotation.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
 namespace DocumentAnnotation.Migrations
 {
     [DbContext(typeof(AnnotationContext))]

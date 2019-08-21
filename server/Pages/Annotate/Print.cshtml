@@ -1,0 +1,50 @@
+﻿@page
+
+@using DocumentAnnotation.Extensions
+@using DocumentAnnotation.Pages.Partials
+@model DocumentAnnotation.Pages.Annotate.PrintModel
+
+@{
+    ViewData["Title"] = $"Bk{Model.Book.Name}";
+    ViewData["PageTitle"] = $"{Model.DocAnn.Name}";
+    ViewData["PageSubtitle"] = $"Annotations on book {Model.Book.Name} of the {Model.TextData.Title}";
+}
+
+@section Styles {
+    @await Html.WebpackStylesAsync("page-annotate-view")
+}
+
+@section Scripts {
+    @await Html.WebpackScriptsAsync("page-annotate-print")
+}
+
+<div id="container-fluid">
+    @{
+        var filtered = Model.Annotators.Select((ann, index) => (ann, index)).Where(awi => awi.Item1.Annotations.Count > 0).ToList(); 
+        
+    }
+    <text>This printout contains the following sections: @string.Join("; ", filtered.Select(awi => Model.Book.Sections[awi.Item2].Name).ToList())</text>
+
+
+    @for (var i = 0; i < filtered.Count; i++)
+    {
+        var ann = filtered[i].Item1;
+        var section = filtered[i].Item2;
+        <div class="foregroundContainer">
+            @Html.JsonDataBlock($"annotationData{i}", ann.Annotations)
+            <div class="documentContainer">
+                @await Html.PartialAsync("Partials/AnnotatedTextPartial", new AnnotatedTextPartial(ann.Groups, ann.GetIdsForAllWords(), Model.TextData.AddNewLine))
+
+            </div>
+            <div class="annotationContainer">
+                @await Html.PartialAsync("Partials/AnnotationTablePartialForPrint", new AnnotationTablePartialForPrint
+                    (ann.Annotations, Model.Book.Sections[section].Name))
+                <hr/>
+
+            </div>
+        </div>
+        
+    }
+
+
+</div>

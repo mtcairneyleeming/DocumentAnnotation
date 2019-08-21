@@ -7,25 +7,25 @@ namespace DocumentAnnotation.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "End_LocationId",
-                table: "Highlights");
+                "End_LocationId",
+                "Highlights");
 
             migrationBuilder.DropColumn(
-                name: "Start_LocationId",
-                table: "Highlights");
+                "Start_LocationId",
+                "Highlights");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "End_LocationId",
-                table: "Highlights",
+                "End_LocationId",
+                "Highlights",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "Start_LocationId",
-                table: "Highlights",
+                "Start_LocationId",
+                "Highlights",
                 nullable: false,
                 defaultValue: 0);
         }

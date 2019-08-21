@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using DocumentAnnotation.TextLoader;
 
@@ -6,10 +5,10 @@ namespace DocumentAnnotation.Pages.Partials
 {
     public class TextPartial
     {
-        public TextPartial(List<Group> groups, bool AddNewLine)
+        public TextPartial(List<Group> groups, bool addNewLine)
         {
             Groups = groups;
-            this.AddNewLine = AddNewLine;
+            AddNewLine = addNewLine;
         }
 
         public List<Group> Groups { get; set; }

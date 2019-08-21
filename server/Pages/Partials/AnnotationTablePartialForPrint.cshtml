@@ -1,0 +1,29 @@
+@using Markdig
+@model DocumentAnnotation.Pages.Partials.AnnotationTablePartialForPrint
+
+
+<table class="table table-sm table-striped table-borderless annotationTable">
+    <thead>
+    <tr>
+        <th style="width: 5%">@Model.SectionName</th>
+        <th style="width: 10%">Title</th>
+        <th style="width: 85%">Description</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    @for (var i = 0; i < Model.Annotations.Count; i++)
+    {
+        var ann = Model.Annotations[i];
+
+        <tr id="annotation@(ann.AnnotationId)" data-ann-id="@ann.AnnotationId">
+            <td>@(i + 1)</td>
+            <td>@ann.Title</td>
+            <td>
+                <span class="annotation-text">@Html.Raw(Markdown.ToHtml(ann.Body))</span>
+            </td>
+
+        </tr>
+    }
+    </tbody>
+</table>

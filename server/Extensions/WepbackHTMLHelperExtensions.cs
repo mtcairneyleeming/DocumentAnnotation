@@ -51,5 +51,6 @@ namespace DocumentAnnotation.Extensions
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 })));
         }
+     
     }
 }

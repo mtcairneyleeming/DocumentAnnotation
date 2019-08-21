@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using DocumentAnnotation.TextLoader;
 
@@ -6,11 +5,11 @@ namespace DocumentAnnotation.Pages.Partials
 {
     public class AnnotatedTextPartial
     {
-        public AnnotatedTextPartial(List<Group> groups, List<List<List<int>>> highlightingByWord, bool AddNewLine)
+        public AnnotatedTextPartial(List<Group> groups, List<List<List<int>>> highlightingByWord, bool addNewLine)
         {
             Groups = groups;
             HighlightingByWord = highlightingByWord;
-            this.AddNewLine = AddNewLine;
+            AddNewLine = addNewLine;
         }
 
         public List<Group> Groups { get; set; }

@@ -13,16 +13,13 @@ namespace DocumentAnnotation.Pages.Account.Manage
     public class IndexModel : PageModel
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
         public IndexModel(
             UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager,
             IEmailSender emailSender)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _emailSender = emailSender;
         }
 
@@ -42,9 +39,7 @@ namespace DocumentAnnotation.Pages.Account.Manage
             [EmailAddress]
             public string Email { get; set; }
 
-            [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
+           
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -60,7 +55,7 @@ namespace DocumentAnnotation.Pages.Account.Manage
             Input = new InputModel
             {
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber
+                
             };
 
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
@@ -90,15 +85,7 @@ namespace DocumentAnnotation.Pages.Account.Manage
                 }
             }
 
-            if (Input.PhoneNumber != user.PhoneNumber)
-            {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
-                {
-                    throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
-                }
-            }
-
+           
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
         }

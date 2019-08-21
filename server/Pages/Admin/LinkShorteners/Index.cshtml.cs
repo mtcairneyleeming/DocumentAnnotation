@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+using DocumentAnnotation.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using DocumentAnnotation.Models;
 
-namespace server.Pages.Admin.LinkShorteners
+namespace DocumentAnnotation.Pages.Admin.LinkShorteners
 {
     public class IndexModel : PageModel
     {
-        private readonly DocumentAnnotation.Models.AnnotationContext _context;
+        private readonly AnnotationContext _context;
 
-        public IndexModel(DocumentAnnotation.Models.AnnotationContext context)
+        public IndexModel(AnnotationContext context)
         {
             _context = context;
         }

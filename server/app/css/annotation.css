@@ -8,6 +8,7 @@ span.word.highlighted:before {
     height: 50%;
     font-weight: bold;
     white-space: nowrap;
+    font-size: smaller;
 }
 
 span.word.highlightEnd:before {
@@ -17,21 +18,26 @@ span.word.highlightEnd:before {
 .annotation-text {
     /*white-space: pre-wrap;*/
 }
+.annotation-text > p {
+    margin-bottom: 0.125rem;
+}
+.annotation-text > ul, .annotation-text > ol {
+    margin-bottom: 0.125rem;
+    margin-left: 0;
+    padding-left: 1.5rem;
+}
 
 .annotationEditLink {
     cursor: pointer;
     color: #0000ff;
 }
 
-ul {
-    padding-left: 1rem;
-}
 
 /* Layout - two columns on large screens, 1 on smaller screens*/
 @media (min-width: 1000px) {
-    #foregroundContainer {
+    .foregroundContainer {
         display: grid;
-        grid-template-columns: auto 2.5fr;
+        grid-template-columns: minmax(auto, 1fr) 2.5fr;
         grid-template-areas: "document annotation";
     }
 }
@@ -42,11 +48,11 @@ ul {
     }
 }
 
-#documentContainer {
+.documentContainer {
     grid-area: document;
 }
 
-#annotationContainer {
+.annotationContainer {
     grid-area: annotation;
     margin-left: 1rem;
 }
@@ -69,7 +75,7 @@ ul {
     top: 0px; /*required to put the canvas behind stuff*/
 }
 
-#foregroundContainer {
+.foregroundContainer {
     position: relative;
     width: 100%;
     z-index: 11;
@@ -86,9 +92,10 @@ ul {
         display: none;
     }
 
-    #foregroundContainer {
+    .foregroundContainer {
         display: grid;
         grid-template-columns: minmax(auto, 0.5fr) 1fr;
         grid-template-areas: "document annotation";
+        page-break-before: right;
     }
 }
