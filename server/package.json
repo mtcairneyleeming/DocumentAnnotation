@@ -11,7 +11,7 @@
     "core-js": "^2.5.5",
     "jquery": "^3.5.0",
     "konva": "^2.0.2",
-    "showdown": "^1.9.0"
+    "showdown": "^1.9.1"
   },
   "devDependencies": {
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
