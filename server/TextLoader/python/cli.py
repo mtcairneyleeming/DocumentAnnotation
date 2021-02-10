@@ -14,7 +14,7 @@ import glob
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--input-directory", "-i", type=str, required=True, dest="input")
-parser.add_argument("--recursive", "-r", default=False, required=True, dest="recursive")
+parser.add_argument("--recursive", "-r", default=False, required=False, dest="recursive")
 parser.add_argument("--output-directory", "-o", type=str, required=True, dest="output")
 parser.add_argument("--identifier", "-f", type=str, required=False)
 

@@ -14,9 +14,9 @@ namespace DocumentAnnotation.TextLoader
     public class TextLoader
     {
         private readonly List<Text> _texts = new List<Text>();
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public TextLoader(IHostingEnvironment env)
+        public TextLoader(IWebHostEnvironment env)
         {
             _hostingEnvironment = env;
         }

@@ -9,14 +9,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Serilog;
-using Swashbuckle.AspNetCore.Swagger;
+
 
 namespace DocumentAnnotation
 {
@@ -29,43 +30,40 @@ namespace DocumentAnnotation
 
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; }
-
-
-        public Startup(IHostingEnvironment env)
+  
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: false, reloadOnChange: true);
-
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             var dbString = Configuration.GetValue<string>("DBConnectionString");
+            Console.WriteLine($"Connection string: {dbString}");
             services.AddEntityFrameworkNpgsql().AddDbContext<AnnotationContext>(options =>
             {
                 options.UseNpgsql(dbString);
                 options.EnableSensitiveDataLogging();
+                
             });
-            services.AddMvc();
+          
             /*Adding swagger generation with default settings*/
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new Info
+                options.SwaggerDoc("v1", new OpenApiInfo()
                 {
                     Version = "v1",
                     Title = "Document API",
                     Description = "An API",
-                    TermsOfService = "None"
+                    TermsOfService = new Uri( "https://docann.maxcl.co.uk")
                 });
             });
 
             // requires using Microsoft.AspNetCore.Mvc;
-            services.Configure<MvcOptions>(options => { });
+         
 
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<AnnotationContext>()
@@ -79,14 +77,10 @@ namespace DocumentAnnotation
             services.AddAuthorization(options => { options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin")); });
 
             // enforce authentication by default
-            services.AddMvc(config =>
-            {
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                config.Filters.Add(new AuthorizeFilter(policy));
-            }).AddRazorPagesOptions(options =>
-            {
+            services.AddRazorPages()
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeFolder("/");
                 // allow anonymous access to view annotations and read texts
                 options.Conventions.AllowAnonymousToPage("/Annotate/View");
                 options.Conventions.AllowAnonymousToPage("/Annotate/Print");
@@ -100,6 +94,7 @@ namespace DocumentAnnotation
                 options.Conventions.AuthorizePage("/Texts/Edit", "RequireAdminRole");
                 options.Conventions.AuthorizePage("/Texts/Create", "RequireAdminRole");
             });
+            services.AddControllers();
 
             services.AddCors();
         }
@@ -128,7 +123,7 @@ namespace DocumentAnnotation
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services, IOptions<Config> config)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider services, IOptions<Config> config)
         {
             if (env.IsDevelopment())
             {
@@ -143,20 +138,21 @@ namespace DocumentAnnotation
 
             app.UseStaticFiles();
             app.UseAuthentication();
-            app.UseMvc(routes =>
+
+            app.UseRouting();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+                endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
             });
+          
 
             CreateUserRoles(services, config.Value.AdminEmails).Wait();
-            app.UseSwagger(c => { c.PreSerializeFilters.Add((swaggerDoc, httpReq) => swaggerDoc.Host = httpReq.Host.Value); });
-
-
-            /*Enabling Swagger ui, consider doing it on Development env only*/
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1"); });
-            app.UseMvcWithDefaultRoute();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json",
+                "WebApp1 v1"));
+         
             app.UseCors(builder =>
             {
                 builder.WithOrigins("http://docann.maxcl.co.uk", "https://docann.maxcl.co.uk", "http://localhost:5002").AllowAnyMethod();

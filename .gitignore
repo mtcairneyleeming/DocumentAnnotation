@@ -301,8 +301,8 @@ __pycache__/
 # NuGet packages folder
 packages
 /server/appsettings.json
-OriginalTexts
-ProcessedTexts
+/server/Data/OriginalTexts
+#/server/Data/ProcessedTexts
 assets
 server/wwwroot
 Generated
