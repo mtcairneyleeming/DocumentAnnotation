@@ -304,9 +304,7 @@ packages
 OriginalTexts
 ProcessedTexts
 assets
-css
-css
-js
+server/wwwroot
 Generated
 /screenshots/buddy-screenshot.png
 /screenshots/package.json

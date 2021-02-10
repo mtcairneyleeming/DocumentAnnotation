@@ -1,17 +1,17 @@
 // noinspection JSMethodCanBeStatic
 
-import { Text} from "./types/TextTypes"
+import { Text } from "./types/TextTypes"
 
 export class SelectController {
     constructor(bookId: string, sectionId: string, textNames: Text) {
         this.bookId = bookId;
         this.sectionId = sectionId;
-        this.textNames = textNames;
+        this.texts = textNames;
     }
 
     private bookId: string;
     private sectionId: string;
-    private textNames: Text;
+    private texts: Text;
 
     init() {
         this.initialiseSelects();
@@ -25,8 +25,8 @@ export class SelectController {
     }
 
     private initialiseSelects() {
-        SelectController.setSelectOptions("bookSelect", this.textNames.books.map(b => b.name), this.bookId);
-        SelectController.setSelectOptions("sectionSelect", this.textNames.books.find(b => b.name === this.bookId).sections.map(s => s.name), this.sectionId);
+        SelectController.setSelectOptions("bookSelect", this.texts.books.map(b => b.name), this.bookId);
+        SelectController.setSelectOptions("sectionSelect", this.texts.books.find(b => b.name === this.bookId).sections.map(s => s.name), this.sectionId);
     }
 
     updateBook() {
@@ -53,7 +53,7 @@ export class SelectController {
     }
 
 
-    private static updateQueryStringParameter(uri, key, value) {
+    private static updateQueryStringParameter(uri: string, key: string, value: string) {
         const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
         const separator = uri.indexOf('?') !== -1 ? "&" : "?";
         if (uri.match(re)) {
@@ -63,7 +63,7 @@ export class SelectController {
         }
     }
 
-    private static setSelectOptions(id, options, currentSelection) {
+    private static setSelectOptions(id: string, options: string[], currentSelection: string) {
         let select = $(`#${id}`);
         select.empty();
         for (let i = 0; i < options.length; i++) {

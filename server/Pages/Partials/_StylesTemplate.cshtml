@@ -1,0 +1,5 @@
+<% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
+    <% for (var css in htmlWebpackPlugin.files.chunks[chunk].css) { %>
+<link rel="stylesheet" href="<%= htmlWebpackPlugin.files.chunks[chunk].css[css] %>" />
+    <% } %>
+<% } %>

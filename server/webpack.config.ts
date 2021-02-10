@@ -86,7 +86,6 @@ const config: webpack.Configuration = {
         ]
     },
     plugins: [
-        new CleanObsoleteChunks({}),
         new HardSourceWebpackPlugin({
             info: {
                 // 'none' or 'test'.
@@ -99,7 +98,7 @@ const config: webpack.Configuration = {
         ...bundles.filter(x => x.startsWith("page-")).map((value) => {
             return new HtmlWebpackPlugin({
                 filename: path.join(__dirname, '/Pages/Partials/Generated/_Gen_' + value + '_Scripts.cshtml'),
-                template: path.join(__dirname, '/Pages/Partials/Generated/_ScriptsTemplate.cshtml'),
+                template: path.join(__dirname, '/Pages/Partials/_ScriptsTemplate.cshtml'),
                 chunks: ['jquery', 'bootstrap', value,],
                 inject: false,
                 chunksSortMode: 'manual',
@@ -108,7 +107,7 @@ const config: webpack.Configuration = {
         ...bundles.filter(x => x.startsWith("page-")).map((value) => {
             return new HtmlWebpackPlugin({
                 filename: path.join(__dirname, '/Pages/Partials/Generated/_Gen_' + value + '_Styles.cshtml'),
-                template: path.join(__dirname, '/Pages/Partials/Generated/_StylesTemplate.cshtml'),
+                template: path.join(__dirname, '/Pages/Partials/_StylesTemplate.cshtml'),
                 chunks: ['jquery', 'bootstrap', value, 'font-awesome'],
                 inject: false,
                 chunksSortMode: 'manual',
