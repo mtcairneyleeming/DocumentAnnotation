@@ -1,7 +1,7 @@
 import "../../css/annotation.css";
 import "../../css/text-view.css";
-import { Annotator } from "../Annotator";
-import { Annotation } from "../types/Annotation";
+import Annotator from "../Annotator";
+import Annotation from "../types/Annotation";
 import { Mode } from "../types/Mode";
 
 let annotator: Annotator;

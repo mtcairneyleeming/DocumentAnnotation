@@ -1,6 +1,6 @@
 import axios from "axios"
-import { Annotation } from "./types/Annotation";
-import { Highlight } from "./types/Highlight";
+import Annotation from "./types/Annotation";
+import Highlight from "./types/Highlight";
 
 export class ServerInteractions {
 

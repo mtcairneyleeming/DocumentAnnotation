@@ -1,6 +1,6 @@
 
 
-import { Annotation } from "./types/Annotation";
+import Annotation from "./types/Annotation";
 import { BracketStatus } from "./types/BracketStatus"
 export class Helpers {
 

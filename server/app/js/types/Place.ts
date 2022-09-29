@@ -1,6 +1,6 @@
 
 // a location in the c#
-export class Place {
+export default class Place {
     bookNumber: number;
     sectionNumber: number;
     exact: boolean;

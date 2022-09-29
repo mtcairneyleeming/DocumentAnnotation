@@ -1,6 +1,6 @@
-import { Highlight } from "./Highlight";
+import Highlight from "./Highlight";
 
-export class Annotation {
+export default class Annotation {
     highlights: Highlight[];
     title: string;
     body: string;

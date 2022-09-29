@@ -2,9 +2,9 @@ import showdown = require("showdown");
 import { getAnnotationColour } from "./colours";
 import { Helpers } from "./Helpers";
 import { ServerInteractions } from "./ServerInteractions";
-import { Annotation } from "./types/Annotation";
-import { Highlight } from "./types/Highlight";
-import { Place } from "./types/Place";
+import Annotation from "./types/Annotation";
+import Highlight from "./types/Highlight";
+import Place from "./types/Place";
 
 export class AnnotationEditor {
     annotations: Annotation[];

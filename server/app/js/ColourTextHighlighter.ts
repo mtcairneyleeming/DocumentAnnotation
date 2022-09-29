@@ -1,6 +1,5 @@
 
-import * as konva from "konva"
-import Konva = require("konva");
+import Konva from 'konva';
 import { getAnnotationColour, getHighlightingData, HighlightType } from "./colours"
 import { Helpers } from "./Helpers"
 import { BracketStatus } from "./types/BracketStatus"
@@ -16,20 +15,20 @@ class Line {
 
 }
 export class ColourTextHighlighter {
-    stage: konva.Stage;
-    layer: konva.Layer;
+    stage: Konva.Stage;
+    layer: Konva.Layer;
     annLines: Line[];
     hoverLines: Line[];
     ColourTextHighlighter: ColourTextHighlighter;
 
     constructor() {
         // initial set up of canvas
-        this.stage = new konva.Stage({
+        this.stage = new Konva.Stage({
             container: "backgroundContainer",
             width: Helpers.contentCtr.clientWidth,
             height: Helpers.contentCtr.clientHeight
         });
-        this.layer = new konva.Layer();
+        this.layer = new Konva.Layer();
         this.stage.add(this.layer);
     }
 
@@ -80,7 +79,7 @@ export class ColourTextHighlighter {
     };
     draw() {
         // draw lines from a highlight to the annotation comment
-        var _a: konva.Layer<konva.Node>;
+        var _a: Konva.Layer;
         var groups = document.getElementsByClassName("group");
         // clear layer
         this.layer.destroyChildren();
@@ -208,7 +207,7 @@ export class ColourTextHighlighter {
                         });
                         shapesToAdd.push(hoverTopLine);
                         this.hoverLines.push({ annId: id, line: hoverTopLine });
-                        var hoverBottomLine = new konva.Line({
+                        var hoverBottomLine = new Konva.Line({
                             points: [spanBottomLeft.x, spanBottomLeft.y + 4, spanBottomRight.x, spanBottomRight.y + 4],
                             strokeWidth: 2,
                             stroke: getAnnotationColour(id),
@@ -218,7 +217,7 @@ export class ColourTextHighlighter {
                         this.hoverLines.push({ annId: id, line: hoverBottomLine });
                         break;
                     case HighlightType.Underline:
-                        var underlineRect = new konva.Rect({
+                        var underlineRect = new Konva.Rect({
                             x: spanBottomLeft.x,
                             y: spanBottomLeft.y + i * 4,
                             height: 4,
@@ -228,7 +227,7 @@ export class ColourTextHighlighter {
                         shapesToAdd.push(underlineRect);
                         break;
                     case HighlightType.Highlight:
-                        var highlightRect = new konva.Rect({
+                        var highlightRect = new Konva.Rect({
                             x: spanBottomLeft.x,
                             y: spanTopLeft.y,
                             height: spanHeight + 4,
@@ -267,7 +266,7 @@ export class ColourTextHighlighter {
                     x: tableRow.left - canvasRect.left + 15,
                     y: tableRow.top + 0.5 * (tableRow.height) - canvasRect.top
                 };
-                var line = new konva.Line({
+                var line = new Konva.Line({
                     points: [spanBottomRight.x, spanBottomRight.y, annLeftMiddle.x, annLeftMiddle.y],
                     stroke: getAnnotationColour(id),
                     strokeWidth: 2,
@@ -281,8 +280,8 @@ export class ColourTextHighlighter {
         return shapesToAdd;
     };
     onResize() {
-        this.stage.setWidth(Helpers.contentCtr.clientWidth);
-        this.stage.setHeight(Helpers.contentCtr.clientHeight);
+        this.stage.width(Helpers.contentCtr.clientWidth);
+        this.stage.height(Helpers.contentCtr.clientHeight);
         this.draw();
     };
     updateCanvas() {

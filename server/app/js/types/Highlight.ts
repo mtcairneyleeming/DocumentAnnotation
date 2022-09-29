@@ -1,6 +1,6 @@
-import { Place } from "./Place";
+import Place from "./Place";
 
-export class Highlight {
+export default class Highlight {
     location: Place;
     annotationId: number;
     constructor(location: Place, annotationId: number) {

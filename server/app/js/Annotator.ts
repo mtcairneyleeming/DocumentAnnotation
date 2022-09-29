@@ -5,8 +5,8 @@ import { ColourTextHighlighter } from "./ColourTextHighlighter";
 import { TableDisplay } from "./TableDisplay";
 import { AnnotationEditor } from "./AnnotationEditor";
 import { Mode } from "./types/Mode";
-import { Annotation } from "./types/Annotation";
-export class Annotator {
+import Annotation from "./types/Annotation";
+export default class Annotator {
     annotations: Annotation[];
     mode: Mode;
     docAnnId: number;
