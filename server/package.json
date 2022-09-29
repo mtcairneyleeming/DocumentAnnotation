@@ -6,7 +6,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "~5.8.1",
     "@fortawesome/free-solid-svg-icons": "~5.8.1",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "bootstrap": "^4.0.0",
     "core-js": "^2.5.5",
     "jquery": "^3.5.0",
