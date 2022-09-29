@@ -70,16 +70,16 @@ const config: webpack.Configuration = {
     plugins: [
 
         new MiniCssExtractPlugin(),
-        ...bundles.filter(x => x.startsWith("page-")).map((value) => {
+        ...bundles.map((value) => {
             return new HtmlWebpackPlugin({
                 filename: path.join(__dirname, '/Pages/Partials/Generated/_Gen_' + value + '_Scripts.cshtml'),
                 template: path.join(__dirname, '/Pages/Partials/_ScriptsTemplate.cshtml'),
-                chunks: ['jquery', 'bootstrap', value,],
+                chunks: ['jquery', 'bootstrap', value],
                 inject: false,
                 chunksSortMode: 'manual',
             })
         }),
-        ...bundles.filter(x => x.startsWith("page-")).map((value) => {
+        ...bundles.map((value) => {
             return new HtmlWebpackPlugin({
                 filename: path.join(__dirname, '/Pages/Partials/Generated/_Gen_' + value + '_Styles.cshtml'),
                 template: path.join(__dirname, '/Pages/Partials/_StylesTemplate.cshtml'),
@@ -87,25 +87,8 @@ const config: webpack.Configuration = {
                 inject: false,
                 chunksSortMode: 'manual',
             })
-        }),
-        ...bundles.filter(x => !x.startsWith("page-")).map((value) => {
-            return new HtmlWebpackPlugin({
-                filename: path.join(__dirname, '/Pages/Partials/Generated/_Gen_' + value + '_Scripts.cshtml'),
-                template: path.join(__dirname, '/Pages/Partials/Generated/_ScriptsTemplate.cshtml'),
-                chunks: [value],
-                inject: false,
-                chunksSortMode: 'manual',
-            })
-        }),
-        ...bundles.filter(x => !x.startsWith("page-")).map((value) => {
-            return new HtmlWebpackPlugin({
-                filename: path.join(__dirname, '/Pages/Partials/Generated/_Gen_' + value + '_Styles.cshtml'),
-                template: path.join(__dirname, '/Pages/Partials/Generated/_StylesTemplate.cshtml'),
-                chunks: [value],
-                inject: false,
-                chunksSortMode: 'manual',
-            })
         })
+       
     ]
 };
 
