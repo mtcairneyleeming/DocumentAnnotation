@@ -314,3 +314,6 @@ Generated
 /server/appsettings.Production.json
 /server/stats.json
 /*.sql
+
+# tar file for publish
+publish.tar.xz
