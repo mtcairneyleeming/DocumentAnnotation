@@ -10,7 +10,9 @@ namespace DocumentAnnotation.Models
 
         public Location Location { get; set; }
 
-        [JsonIgnore]
+        // TODO: why are there 2 serialisation libraries????
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public Annotation Annotation { get; set; }
 
         public int AnnotationId { get; set; }

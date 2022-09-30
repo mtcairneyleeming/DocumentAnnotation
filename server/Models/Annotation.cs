@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using Newtonsoft.Json;
-
 namespace DocumentAnnotation.Models
 {
     /// <summary>
@@ -21,7 +19,9 @@ namespace DocumentAnnotation.Models
 
         public int DocumentId { get; set; }
 
-        [JsonIgnore]
+        // TODO: why are there 2 serialisation libraries????
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public Document Document { get; set; }
     }
 }
