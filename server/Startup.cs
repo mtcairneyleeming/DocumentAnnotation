@@ -15,7 +15,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
 using Serilog;
 
 
@@ -51,16 +50,7 @@ namespace DocumentAnnotation
             });
           
             /*Adding swagger generation with default settings*/
-            services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo()
-                {
-                    Version = "v1",
-                    Title = "Document API",
-                    Description = "An API",
-                    TermsOfService = new Uri( "https://docann.maxcl.co.uk")
-                });
-            });
+            services.AddSwaggerGen();
 
             // requires using Microsoft.AspNetCore.Mvc;
          
