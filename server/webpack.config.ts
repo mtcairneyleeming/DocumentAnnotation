@@ -7,19 +7,25 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const srcPath = path.join(__dirname, '/app'),
     distPath = path.join(__dirname, '/wwwroot');
 
-const isDevelopment = false;
-
 // This defines all the bundles that get generated, including the .cshtml files
 // that get generated so we can include assets in views.
 const bundles = fs.readdirSync(path.join(__dirname, '/app/js/bundles'))
     .map((value) => value.substring(0, value.length - 3));
 
 
-const config: webpack.Configuration = {
+// `--mode development` is passed by `npm run build` (watch) and by `dotnet build` in Debug; everything else
+// (`npm run build-once`, `dotnet publish -c Release`) builds in production mode (minified, no dev helpers).
+export default (env: unknown, argv: { mode?: 'development' | 'production' | 'none' }): webpack.Configuration => {
+const mode = argv.mode === 'development' ? 'development' : 'production';
+
+return {
     cache: true,
+    // external .map files in both modes, so production stack traces stay readable in dev tools
     devtool: 'source-map',
     context: srcPath,
-    mode: 'development',
+    mode: mode,
+    // the bundles include Konva and Bootstrap; the size-limit warning is just noise here
+    performance: { hints: false },
     entry: {
         'jquery': [
             // this shim exports $ and jQuery to window, because when you include
@@ -42,8 +48,17 @@ const config: webpack.Configuration = {
     },
     output: {
         path: distPath,
-        filename: 'js/[name].' + (isDevelopment ? 'dev' : 'min') + '.js',
+        // same file name in both modes, so switching modes never leaves stale bundles in wwwroot (which publish would ship)
+        filename: 'js/[name].min.js',
         publicPath: '/',
+    },
+    // Plugins (jquery-validation and so on) must attach to the jQuery that the `jquery` entry put on window, not to a
+    // second copy bundled into their own entry. Only the shim that creates that global bundles jQuery itself.
+    externals: ({ request, contextInfo }, callback) => {
+        if (request === 'jquery' && !/jquery-shim/.test(contextInfo.issuer || '')) {
+            return callback(undefined, 'root jQuery');
+        }
+        callback();
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js'],
@@ -91,5 +106,4 @@ const config: webpack.Configuration = {
        
     ]
 };
-
-export default config;
+};

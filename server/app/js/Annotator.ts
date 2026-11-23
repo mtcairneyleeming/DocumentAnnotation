@@ -41,7 +41,6 @@ export default class Annotator {
             case Mode.Printing:
                 // all this needs is displaying numbered highlights on the text
                 var annNumLists = TableDisplay.getAnnotationNumbers();
-                console.log(annNumLists);
                 PrintTextHighlighter.showDocumentNumbersOnAllTables(true, annNumLists);
                 break;
         }

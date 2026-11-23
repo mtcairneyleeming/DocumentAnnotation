@@ -88,6 +88,7 @@ span.word.highlightEnd:before {
 @media print {
     .newAnnotationRow,
     .button-cell,
+    .no-print,
     #colouredModeToggle {
         display: none;
     }

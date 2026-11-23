@@ -1,4 +1,4 @@
-import showdown = require("showdown");
+import { renderMarkdown } from "./Markdown";
 import { getAnnotationColour } from "./colours";
 import { Helpers } from "./Helpers";
 import { ServerInteractions } from "./ServerInteractions";
@@ -36,6 +36,10 @@ export class AnnotationEditor {
             var id = $(e.currentTarget).closest("tr").data().annId;
             this.readAnnotationFromForm(id);
             ServerInteractions.updateAnnotation(Helpers.getAnnotation(id, this.annotations), this.highlightsToAdd, this.highlightsToRemove, false).then((annotation) => {
+                // replace our copy with the saved one (it has the current highlights, with their ids)
+                this.annotations[Helpers.getAnnotationIndex(annotation.annotationId, this.annotations)] = annotation;
+                this.highlightsToAdd = [];
+                this.highlightsToRemove = [];
                 this.annBeingEdited = 0;
                 this.updateHighlightsByAnnotation(annotation.annotationId);
             });
@@ -86,6 +90,7 @@ export class AnnotationEditor {
             promise.then((annotation: Annotation) => {
                 this.annotations[Helpers.getAnnotationIndex(0, this.annotations)] = annotation; // also sets id
                 this.annotations.push(new Annotation([], "", "", 0, this.docAnnId));
+                this.highlightsToAdd = [];
                 this.annBeingEdited = 0;
                 this.updateHighlightsByAnnotation(annotation.annotationId);
                 AnnotationEditor.addTableRow(annotation);
@@ -122,20 +127,48 @@ export class AnnotationEditor {
     }
 
     setEditingStatus(annotationId: number, editing: boolean) {
-        var element = document.getElementById("annotation" + annotationId);
+        var row = $(document.getElementById("annotation" + annotationId));
         var ann = Helpers.getAnnotation(annotationId, this.annotations);
+        var colourStyle = "background-color: " + getAnnotationColour(annotationId);
         if (editing) {
-            element.innerHTML =
-                "\n            <td style=\"background-color: " + getAnnotationColour(annotationId) + "\"></td>\n                        <td><input type=\"text\" class=\"form-control annTitle\" placeholder=\"Annotation Title\"\n                   value=\"" + ann.title + "\"></td>\n                        <td>\n                           <textarea rows=\"5\" placeholder=\"Your annotation\" class=\"form-control annBody\">" + ann.body + "</textarea>\n                        </td>\n                        <td>\n                            <button class=\"btn btn-primary ann-edit-save\">Save</button>\n                            <button class=\"btn btn-danger ann-edit-delete\">Delete</button>\n                            <button class=\"btn btn-outline-danger ann-edit-cancel\">Cancel</button>\n                        </td>";
+            // user text goes in through .val()/.text(), never into HTML strings
+            var title = $("<input type=\"text\" class=\"form-control annTitle\" placeholder=\"Annotation Title\">").val(ann.title);
+            var body = $("<textarea rows=\"5\" placeholder=\"Your annotation\" class=\"form-control annBody\"></textarea>").val(ann.body);
+            var buttons = $("<td>")
+                .append($("<button class=\"btn btn-primary ann-edit-save\">Save</button>"), " ",
+                    $("<button class=\"btn btn-danger ann-edit-delete\">Delete</button>"), " ",
+                    $("<button class=\"btn btn-outline-danger ann-edit-cancel\">Cancel</button>"));
+            row.empty().append(
+                AnnotationEditor.colourCell(colourStyle),
+                $("<td>").append(title),
+                $("<td>").append(body),
+                buttons);
         }
         else {
-            element.innerHTML = "<td style=\"background-color: " + getAnnotationColour(annotationId) + "\"></td>\n                        <td>" + ann.title + "</td>\n                        <td>\n                            <span class=\"annotation-text\">" + new showdown.Converter().makeHtml(ann.body) + "</span>\n                        </td>\n                        <td>\n                            <span class=\"annotationEditLink\">Edit</span>\n                        </td>";
+            row.empty().append(AnnotationEditor.annotationCells(ann, colourStyle));
         }
     };
+    // the cells of a (non-editing) annotation row. The title is plain text; the body is Markdown that renderMarkdown
+    // sanitises (marked + DOMPurify), the same way the server does when the page loads.
+    static annotationCells(ann: Annotation, colourStyle: string) {
+        var text = $("<span class=\"annotation-text\">").html(renderMarkdown(ann.body));
+        return [
+            AnnotationEditor.colourCell(colourStyle),
+            $("<td>").text(ann.title),
+            $("<td>").append(text),
+            $("<td>").append($("<span class=\"annotationEditLink\">Edit</span>"))
+        ];
+    }
+    // the first table cell: the colour swatch (empty style in numbered mode, where TableDisplay fills it in)
+    static colourCell(colourStyle: string) {
+        return $("<td>").attr("style", colourStyle);
+    }
     static addTableRow(ann: Annotation) {
         var tableBody = $(".annotationTable > tbody");
-        console.log("fsknjdfasnkjfadskjnsdfankjdfskjnf");
-        tableBody.append("<tr id=\"annotation" + ann.annotationId + "\" data-ann-id=\"" + ann.annotationId + "\">\n        <td style=\"background-color: " + (window.localStorage.getItem("displayMode") != "lines" ? getAnnotationColour(ann.annotationId) + "!important" : "") + "\"></td>\n                        <td>" + ann.title + "</td>\n                        <td>\n                            <span class=\"annotation-text\">" + new showdown.Converter().makeHtml(ann.body) + "</span>\n                        </td>\n                        <td>\n                            <span class=\"annotationEditLink\">Edit</span>\n                        </td></tr>");
+        var colourStyle = window.localStorage.getItem("displayMode") != "lines" ? "background-color: " + getAnnotationColour(ann.annotationId) + "!important" : "";
+        var row = $("<tr>").attr("id", "annotation" + ann.annotationId).attr("data-ann-id", ann.annotationId);
+        row.append(AnnotationEditor.annotationCells(ann, colourStyle));
+        tableBody.append(row);
     };
     static removeTableRow(annotationId: string) {
         var row = $(".annotationTable > tbody > tr#annotation" + annotationId);

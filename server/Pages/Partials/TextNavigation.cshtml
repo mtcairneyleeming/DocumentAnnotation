@@ -2,17 +2,19 @@
 <h4>Navigation</h4>
 <hr/>
 <form>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="bookSelect">Book</label>
-            <select class="form-control"id="bookSelect"></select>
+    <div class="row g-2">
+        <div class="mb-3 col-md-6">
+            <label for="bookSelect" class="form-label">Book</label>
+            <select class="form-select" id="bookSelect"></select>
         </div>
-        <div class="form-group col-md-6">
-            <label for="sectionSelect">Section</label>
-            <select class="form-control" id="sectionSelect"></select>
+        <div class="mb-3 col-md-6">
+            <label for="sectionSelect" class="form-label">Section</label>
+            <select class="form-select" id="sectionSelect"></select>
         </div>
 
-        <button class="btn btn-info" type="button" id="navigationButton">Go</button>
+        <div class="col-auto">
+            <button class="btn btn-info" type="button" id="navigationButton">Go</button>
+        </div>
     </div>
 </form>
 <hr/>

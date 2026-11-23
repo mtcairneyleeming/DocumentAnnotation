@@ -1,4 +1,4 @@
-@using Markdig
+@using DocumentAnnotation.Services
 @model DocumentAnnotation.Pages.Partials.AnnotationTablePartialForPrint
 
 
@@ -20,7 +20,7 @@
             <td>@(i + 1)</td>
             <td>@ann.Title</td>
             <td>
-                <span class="annotation-text">@Html.Raw(Markdown.ToHtml(ann.Body))</span>
+                <span class="annotation-text">@Html.Raw(MarkdownRenderer.ToSafeHtml(ann.Body))</span>
             </td>
 
         </tr>

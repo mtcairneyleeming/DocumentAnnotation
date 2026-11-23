@@ -13,7 +13,7 @@ dotnet run            # Development: needs Postgres, see server/appsettings.Deve
 ```
 
 `appsettings.Development.json` only holds placeholders (database `annotations_dev`, user `annotations`,
-password `dev-password`). Swagger and sensitive-data logging are on in Development only.
+password `dev-password`). Sensitive-data logging is on in Development only.
 
 ## Updating dependencies
 
@@ -23,8 +23,8 @@ ops/update.sh
 
 Moves NuGet packages to the newest version within the same major version (10.x for the Microsoft and
 Npgsql packages) and npm packages within their ranges, builds, then prints `--vulnerable`, `--outdated`,
-`npm audit`, `npm outdated` and `git diff --stat`. It never deploys. Majors (Bootstrap 5, jQuery 4,
-webpack-cli 7, TypeScript 7, Konva 10, EF Core 11, ...) are deliberate manual jobs. `packages.lock.json`
+`npm audit`, `npm outdated` and `git diff --stat`. It never deploys. Majors (EF Core 11, TypeScript 7 (webpack's ts-loader needs the 5.x compiler API), ...)
+are deliberate manual jobs. `packages.lock.json`
 and `server/package-lock.json` are committed.
 
 ## Deploying
@@ -99,7 +99,7 @@ systemctl cat dotnet-docann  # check User=www-data and Environment=ASPNETCORE_EN
 Then, on your machine, `ops/deploy.sh`. The first deploy has no previous release, so no hard links and no
 automatic fall-back; the old `/server/DocumentAnnotation` is still there if you need to point the unit
 back at it. Afterwards check `journalctl -u dotnet-docann -n 50` (there should be no SQL and no
-"Sensitive data logging" lines, and `/swagger` should return 404), then archive and remove
+"Sensitive data logging" lines), then archive and remove
 `/server/DocumentAnnotation`.
 
 Nothing else is needed: the port stays 3041 and Caddy does not change. The unit's `User=www-data` only

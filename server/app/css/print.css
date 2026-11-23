@@ -1,0 +1,91 @@
+/* Annotate -> Print: a black and white, chrome-free print layout. Everything is inside @media print, so the page on
+   screen (the moment before the browser's print dialog covers it) looks like the normal site. */
+@media print {
+    @page {
+        size: a4 landscape;
+        margin: 12mm;
+    }
+
+    html, body, .bg {
+        background: #fff !important;
+    }
+
+    /* black on white everywhere: no colours, no tints, no shadows */
+    body, body * {
+        color: #000 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        -webkit-print-color-adjust: economy;
+    }
+
+    a, a:hover {
+        color: #000 !important;
+        text-decoration: underline;
+    }
+
+    /* site chrome and controls */
+    .navbar,
+    footer,
+    #footer-hr,
+    .text-navigation,
+    .no-print,
+    #colouredModeToggle,
+    #backgroundContainer {
+        display: none !important;
+    }
+
+    .body-content {
+        padding: 0;
+    }
+
+    /* Bootstrap's striped/borderless tables are tinted; draw plain rules instead */
+    .annotationTable {
+        --bs-table-bg: transparent;
+        --bs-table-striped-bg: transparent;
+        --bs-table-accent-bg: transparent;
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .annotationTable > :not(caption) > * > * {
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border-bottom: 0.5pt solid #000 !important;
+    }
+    .annotationTable thead {
+        display: table-header-group; /* repeat the header on every page */
+    }
+    .annotationTable tr {
+        break-inside: avoid;
+    }
+
+    /* each annotated section starts on a new page (not "right", which can leave blank pages when printing duplex) */
+    .foregroundContainer {
+        display: grid !important;
+        grid-template-columns: minmax(auto, 0.5fr) 1fr;
+        grid-template-areas: "document annotation";
+        break-before: auto !important;
+        page-break-before: auto !important;
+    }
+    .foregroundContainer + .foregroundContainer {
+        break-before: page !important;
+        page-break-before: always !important;
+    }
+
+    #title {
+        break-after: avoid;
+    }
+    #title h2, #title h4 {
+        margin-bottom: 0.25rem;
+    }
+
+    /* keep a word and its number label together; the text itself may flow over pages */
+    .group > span.word {
+        break-inside: avoid;
+    }
+
+    /* the underlines/numbers that mark highlighted words are already black (annotation.css) */
+    span.word.highlighted:before {
+        border-bottom-color: #000 !important;
+    }
+}

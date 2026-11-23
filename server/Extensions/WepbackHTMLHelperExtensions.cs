@@ -1,13 +1,19 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
 
 namespace DocumentAnnotation.Extensions
 {
     public static class WebpackHtmlHelperExtensions
     {
+        // camelCase property names; the default encoder escapes <, >, &, ' and + (and non-ASCII) as \uXXXX, so the
+        // output is safe inside a <script> element.
+        private static readonly JsonSerializerOptions DataBlockOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
         /// <summary>
         /// Return the generated partial view that contains the script tags for the Webpack bundle
         /// indicated by <see cref="bundleName"/>.
@@ -45,11 +51,7 @@ namespace DocumentAnnotation.Extensions
             return new HtmlFormattableString(
                 "<script type=\"application/json\" id=\"{0}\">{1}</script>",
                 id,
-                new HtmlString(JsonConvert.SerializeObject(data, new JsonSerializerSettings
-                {
-                    StringEscapeHandling = StringEscapeHandling.EscapeHtml,
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                })));
+                new HtmlString(JsonSerializer.Serialize(data, DataBlockOptions)));
         }
      
     }

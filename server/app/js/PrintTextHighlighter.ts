@@ -10,7 +10,6 @@ export class PrintTextHighlighter {
             if (prev)
                 prevIds = Helpers.getAnnotationIdsFromElement(prev);
             if (ids.length > 0) {
-                console.log(ids.sort());
                 if (ids.sort().join(',') != prevIds.sort().join(',')) {
                     $(span).attr('data-before', ids.map(i => annotationNumbers[i]).sort((a, b) => a - b).join(","));
                 }
@@ -42,7 +41,6 @@ export class PrintTextHighlighter {
 
         for (var i = 0; i < foregroundContainers.length; i++) {
             Helpers.forAllGroupsInParent((span: HTMLSpanElement, prev: HTMLSpanElement) => {
-                console.log(span);
                 if (show)
                     PrintTextHighlighter.showDocumentNumbersOnSpan(span, prev, annotationNumberLists[i]);
                 else

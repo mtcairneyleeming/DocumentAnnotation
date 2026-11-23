@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Serilog;
 
 namespace DocumentAnnotation.TextLoader
@@ -13,6 +13,12 @@ namespace DocumentAnnotation.TextLoader
     /// </summary>
     public class TextLoader
     {
+        // Newtonsoft matched property names case-insensitively; keep that.
+        private static readonly JsonSerializerOptions TextOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+        };
+
         private readonly List<Text> _texts = new List<Text>();
         private readonly IWebHostEnvironment _hostingEnvironment;
 
@@ -23,6 +29,15 @@ namespace DocumentAnnotation.TextLoader
 
 
         public Text LoadText(string textIdentifier)
+        {
+            // this is a singleton used by concurrent requests, and _texts is a plain List
+            lock (_texts)
+            {
+                return LoadTextLocked(textIdentifier);
+            }
+        }
+
+        private Text LoadTextLocked(string textIdentifier)
         {
             if (IsLoaded(textIdentifier))
             {
@@ -55,13 +70,7 @@ namespace DocumentAnnotation.TextLoader
 
         private static Text DeserializeFromStream(Stream stream)
         {
-            var serializer = new JsonSerializer();
-
-            using (var sr = new StreamReader(stream))
-            using (var jsonTextReader = new JsonTextReader(sr))
-            {
-                return serializer.Deserialize<Text>(jsonTextReader);
-            }
+            return JsonSerializer.Deserialize<Text>(stream, TextOptions);
         }
     }
 }

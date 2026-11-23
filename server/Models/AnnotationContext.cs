@@ -22,6 +22,12 @@ namespace DocumentAnnotation.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // The database was created by Npgsql 2.x, which used serial columns for integer keys. Npgsql 8+
+            // defaults to identity columns instead, which made EF report a model change (and would generate a
+            // pointless serial -> identity migration) even though the schema is unchanged. Keep serial.
+            modelBuilder.UseSerialColumns();
+
             modelBuilder.Entity<Highlight>(entity =>
             {
                 entity.OwnsOne(h => h.Location);

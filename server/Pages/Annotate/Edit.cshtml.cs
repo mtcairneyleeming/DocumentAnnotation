@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Security.Claims;
+using DocumentAnnotation.Authorization;
 using DocumentAnnotation.Models;
 using DocumentAnnotation.TextLoader;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +17,11 @@ namespace DocumentAnnotation.Pages.Annotate
     {
         private readonly AnnotationContext _context;
         private readonly TextLoader.TextLoader _loader;
+        private readonly IAuthorizationService _authorization;
 
-        public EditModel(AnnotationContext context, TextLoader.TextLoader loader)
+        public EditModel(AnnotationContext context, TextLoader.TextLoader loader, IAuthorizationService authorization)
         {
+            _authorization = authorization;
             _context = context;
             _loader = loader;
         }
@@ -35,7 +40,7 @@ namespace DocumentAnnotation.Pages.Annotate
 
         public Annotator.Annotator Annotator { get; private set; }
 
-        public IActionResult OnGet(int? docAnnId, string book, string section, bool print = false)
+        public async Task<IActionResult> OnGet(int? docAnnId, string book, string section, bool print = false)
         {
             if (docAnnId == null)
             {
@@ -51,7 +56,8 @@ namespace DocumentAnnotation.Pages.Annotate
                 return NotFound();
             }
 
-            if (docAnn.UserId != GetCurrentUser())
+            // only the owner can edit
+            if (await _authorization.CheckDocumentAsync(User, docAnn, DocumentOperations.Edit) != DocumentAccess.Allowed)
             {
                 return NotFound();
             }
@@ -109,10 +115,5 @@ namespace DocumentAnnotation.Pages.Annotate
         }
 
         public object Print { get; set; }
-
-        private string GetCurrentUser()
-        {
-            return User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        }
     }
 }

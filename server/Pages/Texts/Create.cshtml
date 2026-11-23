@@ -13,32 +13,32 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Text.Title" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="Text.Title" class="form-label"></label>
                 <input asp-for="Text.Title" class="form-control"/>
                 <span asp-validation-for="Text.Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Text.Author" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="Text.Author" class="form-label"></label>
                 <input asp-for="Text.Author" class="form-control"/>
                 <span asp-validation-for="Text.Author" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Text.Abbreviation" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="Text.Abbreviation" class="form-label"></label>
                 <input asp-for="Text.Abbreviation" class="form-control"/>
                 <span asp-validation-for="Text.Abbreviation" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Text.Identifier" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="Text.Identifier" class="form-label"></label>
                 <input asp-for="Text.Identifier" class="form-control"/>
                 <span asp-validation-for="Text.Identifier" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Text.AddNewLine" class="control-label">Tick if text should not organically continue after each group in this text - e.g. true for verse, but false for everything else.</label>
-                <input asp-for="Text.AddNewLine" class="form-control" type="checkbox"/>
+            <div class="mb-3">
+                <label asp-for="Text.AddNewLine" class="form-label">Tick if text should not organically continue after each group in this text - e.g. true for verse, but false for everything else.</label>
+                <input asp-for="Text.AddNewLine" class="form-check-input" type="checkbox"/>
                 <span asp-validation-for="Text.AddNewLine" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <input type="submit" value="Create" class="btn btn-default"/>
             </div>
         </form>

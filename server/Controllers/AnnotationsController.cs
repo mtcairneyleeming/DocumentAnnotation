@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using DocumentAnnotation.Authorization;
 using DocumentAnnotation.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 
 namespace DocumentAnnotation.Controllers
 {
@@ -22,167 +22,137 @@ namespace DocumentAnnotation.Controllers
         public List<Highlight> HighlightsToAdd { get; set; }
     }
 
-
-
+    /// <summary>
+    /// Annotations of a document. Who may read/write is decided by <see cref="DocumentAuthorizationHandler"/>:
+    /// reads need View access (public documents work anonymously), writes need Edit access (the owner).
+    /// PUT and POST return the saved <see cref="Annotation"/> (including its highlights) as the body.
+    /// </summary>
+    [ApiController]
     [Produces("application/json")]
     [Route("api/Annotations")]
-    public class AnnotationsController : Controller
+    public class AnnotationsController : ControllerBase
     {
         private readonly AnnotationContext _context;
+        private readonly IAuthorizationService _authorization;
 
-        public AnnotationsController(AnnotationContext context)
+        public AnnotationsController(AnnotationContext context, IAuthorizationService authorization)
         {
             _context = context;
+            _authorization = authorization;
         }
-
-        // GET: api/Annotations
-        [HttpGet]
-        public IEnumerable<Annotation> GetAnnotations()
-        {
-            return _context.Annotations;
-        }
-
 
         // GET: api/Annotations/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Annotation>> GetAnnotation([FromRoute] int id)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAnnotation([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var annotation = await _context.Annotations.SingleOrDefaultAsync(m => m.AnnotationId == id);
-
-            if (annotation == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(annotation);
+            var annotation = await LoadAnnotation(id);
+            var denied = (await _authorization.CheckDocumentAsync(User, annotation?.Document, DocumentOperations.View)).ToApiResult();
+            return denied ?? Ok(annotation);
         }
 
         // PUT: api/Annotations/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Annotation>> PutAnnotation([FromRoute] int id, [FromBody] AnnotationPutDTO annotation)
+        [Authorize]
+        public async Task<IActionResult> PutAnnotation([FromRoute] int id, [FromBody] AnnotationPutDTO dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var ann = annotation.Annotation;
-
-            if (id != ann.AnnotationId)
+            var incoming = dto?.Annotation;
+            if (incoming == null || id != incoming.AnnotationId)
             {
                 return BadRequest();
             }
 
-            var docAnn =
-                _context.DocumentAnnotations.SingleOrDefault(d =>
-                    d.DocumentId == ann.DocumentId);
-            if (docAnn is null)
+            // authorise against the document the stored annotation belongs to, never the one named in the request
+            var existing = await LoadAnnotation(id);
+            var denied = (await _authorization.CheckDocumentAsync(User, existing?.Document, DocumentOperations.Edit)).ToApiResult();
+            if (denied != null)
+            {
+                return denied;
+            }
+
+            if (incoming.DocumentId != existing.DocumentId)
             {
                 return BadRequest();
             }
 
-            if (docAnn.UserId != GetCurrentUser())
+            var toAdd = dto.HighlightsToAdd ?? new List<Highlight>();
+            var toRemoveIds = (dto.HighlightsToRemove ?? new List<Highlight>()).Select(h => h.HighlightId).ToList();
+            // only highlights that really belong to this annotation can be removed
+            var toRemove = existing.Highlights.Where(h => toRemoveIds.Contains(h.HighlightId)).ToList();
+            if (toAdd.Any(h => h.AnnotationId != id || h.Location == null) || toRemove.Count != toRemoveIds.Distinct().Count())
             {
-                return Unauthorized();
+                return BadRequest();
             }
 
-            foreach (var highlight in annotation.HighlightsToAdd)
+            existing.Title = incoming.Title;
+            existing.Body = incoming.Body;
+            foreach (var highlight in toAdd)
             {
-                if (highlight.AnnotationId != ann.AnnotationId)
-                {
-                    return BadRequest();
-                }
-
-                highlight.AnnotationId = id;
+                highlight.HighlightId = 0;
+                existing.Highlights.Add(highlight);
             }
 
-            foreach (var highlight in annotation.HighlightsToRemove)
-            {
-                if (highlight.AnnotationId != ann.AnnotationId)
-                {
-                    return BadRequest();
-                }
-            }
-
-
-            _context.Annotations.Update(ann);
-            _context.Highlights.AddRange(annotation.HighlightsToAdd);
-            _context.Highlights.RemoveRange(annotation.HighlightsToRemove);
+            _context.Highlights.RemoveRange(toRemove);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AnnotationExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
-            return Ok(ann);
+            return Ok(existing);
         }
 
         // POST: api/Annotations
         [HttpPost]
-        public async Task<ActionResult<Annotation>> PostAnnotation([FromBody] AnnotationPostDTO annotation)
+        [Authorize]
+        public async Task<IActionResult> PostAnnotation([FromBody] AnnotationPostDTO dto)
         {
-            if (!ModelState.IsValid)
+            var incoming = dto?.Annotation;
+            if (incoming == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
 
-            var ann = annotation.Annotation;
-            var docAnn = _context.DocumentAnnotations.SingleOrDefault(da => da.DocumentId == ann.DocumentId);
-            if (docAnn is null || docAnn.UserId != GetCurrentUser())
+            var document = await _context.DocumentAnnotations.SingleOrDefaultAsync(d => d.DocumentId == incoming.DocumentId);
+            var denied = (await _authorization.CheckDocumentAsync(User, document, DocumentOperations.Edit)).ToApiResult();
+            if (denied != null)
             {
-                Log.Information(GetCurrentUser());
-                return Unauthorized();
+                return denied;
             }
 
-            _context.Annotations.Update(ann);
+            var highlights = dto.HighlightsToAdd ?? new List<Highlight>();
+            if (highlights.Any(h => h.Location == null))
+            {
+                return BadRequest();
+            }
 
+            // build a new entity rather than trusting the client's object graph (ids, nested highlights, ...)
+            var annotation = new Annotation
+            {
+                Title = incoming.Title,
+                Body = incoming.Body,
+                DocumentId = document.DocumentId,
+                Highlights = highlights.Select(h => new Highlight {Location = h.Location}).ToList()
+            };
+            _context.Annotations.Add(annotation);
             await _context.SaveChangesAsync();
 
-            foreach (var highlight in annotation.HighlightsToAdd)
-            {
-                highlight.AnnotationId = ann.AnnotationId;
-            }
-
-            _context.Highlights.AddRange(annotation.HighlightsToAdd);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction("GetAnnotation", new {id = annotation.Annotation.AnnotationId}, annotation);
+            return CreatedAtAction(nameof(GetAnnotation), new {id = annotation.AnnotationId}, annotation);
         }
-
-      
 
         // DELETE: api/Annotations/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAnnotation([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
+            var annotation = await LoadAnnotation(id);
+            var denied = (await _authorization.CheckDocumentAsync(User, annotation?.Document, DocumentOperations.Edit)).ToApiResult();
+            if (denied != null)
             {
-                return BadRequest(ModelState);
-            }
-
-            var annotation = await _context.Annotations.Include(a => a.Document).SingleOrDefaultAsync(m => m.AnnotationId == id);
-            if (annotation == null)
-            {
-                return NotFound();
-            }
-
-            if (annotation.Document.UserId != GetCurrentUser())
-            {
-                return Unauthorized();
+                return denied;
             }
 
             _context.Annotations.Remove(annotation);
@@ -191,14 +161,12 @@ namespace DocumentAnnotation.Controllers
             return Ok(annotation);
         }
 
-        private bool AnnotationExists(int id)
+        private Task<Annotation> LoadAnnotation(int id)
         {
-            return _context.Annotations.Any(e => e.AnnotationId == id);
-        }
-
-        private string GetCurrentUser()
-        {
-            return User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            return _context.Annotations
+                .Include(a => a.Document)
+                .Include(a => a.Highlights)
+                .SingleOrDefaultAsync(a => a.AnnotationId == id);
         }
     }
 }

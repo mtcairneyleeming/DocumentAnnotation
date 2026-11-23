@@ -30,13 +30,20 @@ namespace DocumentAnnotation.TextLoader
                 Name = Name,
                 Books = new List<Book>()
             };
-            ret.Books.Add(Books[book]);
+            var source = Books[book];
             if (section is null)
             {
+                ret.Books.Add(source);
                 return ret;
             }
 
-            ret.Books[0].Sections = new List<Section> {ret.Books[0].Sections[section.Value]};
+            // Copy the book rather than assigning to source.Sections: this Text is the shared instance cached by the
+            // TextLoader, so narrowing the original would permanently remove all the other sections from it.
+            ret.Books.Add(new Book
+            {
+                Name = source.Name,
+                Sections = new List<Section> {source.Sections[section.Value]}
+            });
 
             return ret;
         }

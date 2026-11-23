@@ -54,6 +54,7 @@ export class SelectController {
 
 
     private static updateQueryStringParameter(uri: string, key: string, value: string) {
+        value = encodeURIComponent(value);
         const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
         const separator = uri.indexOf('?') !== -1 ? "&" : "?";
         if (uri.match(re)) {
@@ -68,11 +69,12 @@ export class SelectController {
         select.empty();
         for (let i = 0; i < options.length; i++) {
 
+            // build the option as DOM so names are never parsed as HTML
+            const option = $("<option>").val(options[i]).text(options[i]);
             if (options[i] === currentSelection) {
-                select.append(`<option value="${options[i]}" selected>${options[i]}</option>`);
-            } else {
-                select.append(`<option value="${options[i]}">${options[i]}</option>`);
+                option.prop("selected", true);
             }
+            select.append(option);
         }
     }
 }

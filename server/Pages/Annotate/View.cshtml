@@ -44,6 +44,8 @@
         <div class="annotationContainer">
             @await Html.PartialAsync("Partials/AnnotationTablePartial", new AnnotationTablePartial(Model.Annotator.Annotations, Model.Annotator.GetColoursForAllWords()))
             <button class="btn btn-sm btn-secondary" id="colouredModeToggle">Toggle coloured mode</button>
+            <a class="btn btn-sm btn-outline-secondary no-print" target="_blank" rel="noopener" asp-page="/Annotate/Print"
+               asp-route-docAnnId="@Model.DocAnn.DocumentId" asp-route-book="@Model.Book.Name">Print annotated sections of this book</a>
             <hr/>
             @await Html.PartialAsync("Partials/TextDetails", new TextDetails(Model.TextData, Model.Book.Name, Model.Section.Name))
         </div>

@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using DocumentAnnotation.Authorization;
+using DocumentAnnotation.Extensions;
 using DocumentAnnotation.Models;
 using DocumentAnnotation.TextLoader;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -18,13 +20,13 @@ namespace DocumentAnnotation.Pages.Annotate
     {
         private readonly AnnotationContext _context;
         private readonly TextLoader.TextLoader _loader;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly IAuthorizationService _authorization;
 
-        public ViewModel(AnnotationContext context, TextLoader.TextLoader loader, UserManager<AppUser> userManager)
+        public ViewModel(AnnotationContext context, TextLoader.TextLoader loader, IAuthorizationService authorization)
         {
             _context = context;
             _loader = loader;
-            _userManager = userManager;
+            _authorization = authorization;
         }
 
         public TextData TextData { get; set; }
@@ -57,34 +59,15 @@ namespace DocumentAnnotation.Pages.Annotate
             var docAnn= _context.DocumentAnnotations.Include(da => da.User).Include(da => da.Text).SingleOrDefault(da =>
                 da.DocumentId == docAnnId);
 
-            if (docAnn is null)
+            // public documents: anyone; otherwise the owner and (for limited documents) the users it is shared with
+            switch (await _authorization.CheckDocumentAsync(User, docAnn, DocumentOperations.View))
             {
-                return NotFound();
-            }
-
-            // what to do with different visibilities: private documents can only be read by the author, limited by the author and specified other
-            // people, and public by anyone with the url
-            switch (docAnn.Visibility)
-            {
-                case DocumentVisibility.Public:
-                    // do nothing, as anyone is allowed
-                    Log.Information("Allowed anonymous access to document {docAnnId} as public access has been permitted", docAnnId);
+                case DocumentAccess.Allowed:
                     break;
-                case DocumentVisibility.Limited:
-                    AppUser user = await _userManager.GetUserAsync(User);
-                    if (!docAnn.AllowedUsers.Contains(user.Email))
-                    {
-                        return NotFound();
-                    }
-                    Log.Information("Allowed user {currentUser} access to document {docAnnId} as they have been allowed so", user.Email, docAnnId);
-                    break;
-                case DocumentVisibility.Private:
+                case DocumentAccess.Unauthenticated:
+                    return Challenge();
                 default:
-                    if (docAnn.UserId != GetCurrentUser())
-                    {
-                        return NotFound();
-                    }
-                    break;
+                    return NotFound();
             }
 
             TextData = docAnn.Text;
@@ -129,9 +112,12 @@ namespace DocumentAnnotation.Pages.Annotate
             Annotator = new Annotator.Annotator(annotations, Groups);
 
 
-            // save last-viewed location to the database
-            docAnn.LastLocation = new Location(BookNum, SectionNum);
-            _context.SaveChanges();
+            // remember the last-viewed location, but only for the owner: other viewers must not move it
+            if (User.GetUserId() == docAnn.UserId)
+            {
+                docAnn.LastLocation = new Location(BookNum, SectionNum);
+                _context.SaveChanges();
+            }
             DocAnn = docAnn;
 
             Print = print;
@@ -140,10 +126,5 @@ namespace DocumentAnnotation.Pages.Annotate
         }
 
         public bool Print { get; set; }
-
-        private string GetCurrentUser()
-        {
-            return User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        }
     }
 }

@@ -14,17 +14,17 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="LinkShortener.ShortLink" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="LinkShortener.ShortLink" class="form-label"></label>
                 <input asp-for="LinkShortener.ShortLink" class="form-control" />
                 <span asp-validation-for="LinkShortener.ShortLink" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="LinkShortener.OriginalLink" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="LinkShortener.OriginalLink" class="form-label"></label>
                 <input asp-for="LinkShortener.OriginalLink" class="form-control" />
                 <span asp-validation-for="LinkShortener.OriginalLink" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <input type="submit" value="Create" class="btn btn-default" />
             </div>
         </form>

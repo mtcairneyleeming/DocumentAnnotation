@@ -4,32 +4,40 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "~6.2.0",
-    "@fortawesome/free-solid-svg-icons": "~6.2.0",
+    "@fortawesome/fontawesome-free": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
+    "@popperjs/core": "^2.11.8",
     "axios": "^1.21.1",
-    "bootstrap": "^4.0.0",
+    "bootstrap": "^5.3.9",
     "core-js": "^3.25.3",
-    "jquery": "^3.6.1",
-    "konva": "^8.3.12",
-    "showdown": "^2.1.0"
+    "dompurify": "^3.5.0",
+    "jquery": "^4.1.0",
+    "jquery-validation": "^1.22.1",
+    "jquery-validation-unobtrusive": "^4.0.0",
+    "konva": "^10.10.0",
+    "marked": "^18.2.1"
   },
   "devDependencies": {
-    "@types/bootstrap": "^4.0.0",
+    "@types/bootstrap": "^5.2.11",
     "@types/html-webpack-plugin": "^3.2.6",
-    "@types/jquery": "^3.5.14",
-    "@types/node": "^20.19.43",
-    "@types/showdown": "~2.0.0",
-    "css-loader": "^6.7.1",
+    "@types/jquery": "^4.0.1",
+    "@types/node": "^26.6.6",
+    "css-loader": "^7.1.5",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.6.1",
     "ts-loader": "^9.4.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.8.4",
+    "typescript": "^5.9.3",
     "webpack": "^5.74.0",
-    "webpack-cli": "~4.10.0"
+    "webpack-cli": "^7.3.1"
   },
   "scripts": {
     "build": "webpack --progress -w --mode development",
-    "build-once": "webpack"
+    "build-once": "webpack --mode production"
+  },
+  "overrides": {
+    "jquery-validation-unobtrusive": {
+      "jquery": "$jquery"
+    }
   }
 }

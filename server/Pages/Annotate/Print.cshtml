@@ -11,11 +11,16 @@
 }
 
 @section Styles {
-    @await Html.WebpackStylesAsync("page-annotate-view")
+    @await Html.WebpackStylesAsync("page-annotate-print")
 }
 
 @section Scripts {
     @await Html.WebpackScriptsAsync("page-annotate-print")
+    @Html.JsonDataBlock("info", new
+    {
+        docAnnId = Model.DocAnn.DocumentId,
+        bookNumber = Model.BookNum
+    })
 }
 
 <div id="container-fluid">

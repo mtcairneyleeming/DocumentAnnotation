@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using DocumentAnnotation.Authorization;
 using DocumentAnnotation.Models;
 using DocumentAnnotation.TextLoader;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -18,13 +19,13 @@ namespace DocumentAnnotation.Pages.Annotate
     {
         private readonly AnnotationContext _context;
         private readonly TextLoader.TextLoader _loader;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly IAuthorizationService _authorization;
 
-        public PrintModel(AnnotationContext context, TextLoader.TextLoader loader, UserManager<AppUser> userManager)
+        public PrintModel(AnnotationContext context, TextLoader.TextLoader loader, IAuthorizationService authorization)
         {
             _context = context;
             _loader = loader;
-            _userManager = userManager;
+            _authorization = authorization;
         }
 
         public TextData TextData { get; set; }
@@ -57,40 +58,15 @@ namespace DocumentAnnotation.Pages.Annotate
                 da =>
                     da.DocumentId == docAnnId);
 
-            if (DocAnn is null)
+            // same rules as the View page
+            switch (await _authorization.CheckDocumentAsync(User, DocAnn, DocumentOperations.View))
             {
-                return NotFound();
-            }
-
-            // what to do with different visibilities: private documents can only be read by the author, limited by the author and specified other
-            // people, and public by anyone with the url
-            switch (DocAnn.Visibility)
-            {
-                case DocumentVisibility.Public:
-                    // do nothing, as anyone is allowed
-                    Log.Information(
-                        "Allowed anonymous access to document {docAnnId} as public access has been permitted",
-                        docAnnId);
+                case DocumentAccess.Allowed:
                     break;
-                case DocumentVisibility.Limited:
-                    AppUser user = await _userManager.GetUserAsync(User);
-                    if (!DocAnn.AllowedUsers.Contains(user.Email))
-                    {
-                        return NotFound();
-                    }
-
-                    Log.Information(
-                        "Allowed user {currentUser} access to document {docAnnId} as they have been allowed so",
-                        user.Email, docAnnId);
-                    break;
-                case DocumentVisibility.Private:
+                case DocumentAccess.Unauthenticated:
+                    return Challenge();
                 default:
-                    if (DocAnn.UserId != GetCurrentUser())
-                    {
-                        return NotFound();
-                    }
-
-                    break;
+                    return NotFound();
             }
 
             TextData = DocAnn.Text;
@@ -131,11 +107,6 @@ namespace DocumentAnnotation.Pages.Annotate
 
             
             return Page();
-        }
-
-        private string GetCurrentUser()
-        {
-            return User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
     }
 }

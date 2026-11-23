@@ -41,3 +41,36 @@ html, body, .bg {
         margin-left: 180px;
     }
 }
+
+/* ---- Keep the look the site had on Bootstrap 4 ---- */
+
+/* Bootstrap 5 switched the body font to the system-ui stack; keep the Bootstrap 4 stack. Some pages link
+   bootstrap.css again after this file, so the selectors here are a little more specific than Bootstrap's. */
+:root:root {
+    --bs-body-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Bootstrap 5 underlines every link; Bootstrap 4 only underlined on hover (and never buttons/nav items). */
+html a, html .btn-link {
+    text-decoration: none;
+}
+html .btn-link:hover {
+    text-decoration: underline;
+}
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.navbar-brand):hover {
+    text-decoration: underline;
+}
+
+/* Bootstrap 5 tables are opaque white by default; Bootstrap 4 tables were transparent. */
+html .table {
+    --bs-table-bg: transparent;
+}
+html .table td, html .table th {
+    vertical-align: top;
+}
+
+/* Bootstrap 4 grid columns were position: relative, and the highlight canvas (#backgroundContainer, positioned
+   with left: -15px, see annotation.css) is placed relative to this column. */
+#contentContainer {
+    position: relative;
+}

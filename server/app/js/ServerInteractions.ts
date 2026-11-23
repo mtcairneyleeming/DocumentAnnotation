@@ -15,9 +15,8 @@ export class ServerInteractions {
             if (reload) {
                 window.location.reload();
             }
-            highlightsToAdd = [];
-            // @ts-ignore
-            return res.data.annotation;
+            // the API responds with the saved annotation itself, including its highlights
+            return res.data as Annotation;
         });
     };
     static updateAnnotation(annotation: Annotation, highlightsToAdd: Highlight[], highlightsToRemove: Highlight[], reload: boolean = true) {
@@ -33,10 +32,7 @@ export class ServerInteractions {
             if (reload) {
                 window.location.reload();
             }
-            highlightsToAdd = [];
-            highlightsToRemove = [];
-            // @ts-ignore
-            return res.data.annotation;
+            return res.data as Annotation;
         });
     };
     static deleteAnnotationFromServer(annotationId: string, reload: boolean = true) {
