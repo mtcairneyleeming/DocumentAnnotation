@@ -5,22 +5,28 @@
         <AssemblyName>DocumentAnnotation</AssemblyName>
         <RootNamespace>DocumentAnnotation</RootNamespace>
         <LangVersion>9</LangVersion>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Markdig.Signed" Version="1.1.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.3" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.3" />
-        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.3" />
-        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
+        <PackageReference Include="Markdig.Signed" Version="1.6.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.15" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.15" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-        <PackageReference Include="Serilog" Version="4.3.1" />
+        <PackageReference Include="Serilog" Version="4.4.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- dev-only config (placeholders) must not ship in the release -->
+        <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+        <!-- frontend build files are not part of the release -->
+        <Content Update="package.json;package-lock.json;tsconfig.json;tsconfig-bootstrap.json" CopyToPublishDirectory="Never" />
+        <None Update="package.json;package-lock.json;tsconfig.json;tsconfig-bootstrap.json" CopyToPublishDirectory="Never" />
     </ItemGroup>
     <ItemGroup>
         <WebpackInputs Include="app\**\*" />
@@ -154,7 +160,7 @@
         <_ContentIncludedByDefault Remove="Pages\Partials\AnnotationTablePartialForPrint.cshtml" />
     </ItemGroup>
     <Target Name="CompileWebpack" BeforeTargets="Build;">
-        <Exec Command="yarn build-once" ContinueOnError="false" />
+        <Exec Command="npm run build-once" ContinueOnError="false" />
     </Target>
     <Target Name="BuildClientAssets" BeforeTargets="BeforeBuild" Inputs="@(WebpackInputs)" Outputs="@(WebpackOutputs)">
         <ItemGroup>

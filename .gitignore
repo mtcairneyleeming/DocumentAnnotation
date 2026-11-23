@@ -317,3 +317,5 @@ Generated
 
 # tar file for publish
 publish.tar.xz
+# ops
+ops/ssh-log.md

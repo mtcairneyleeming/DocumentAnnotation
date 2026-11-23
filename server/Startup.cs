@@ -30,10 +30,13 @@ namespace DocumentAnnotation
     public class Startup
     {
   
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            Environment = environment;
         }
+
+        private IWebHostEnvironment Environment { get; }
 
         public IConfiguration Configuration { get; }
 
@@ -41,16 +44,21 @@ namespace DocumentAnnotation
         public void ConfigureServices(IServiceCollection services)
         {
             var dbString = Configuration.GetValue<string>("DBConnectionString");
-            Console.WriteLine($"Connection string: {dbString}");
-            services.AddEntityFrameworkNpgsql().AddDbContext<AnnotationContext>(options =>
+            services.AddDbContext<AnnotationContext>(options =>
             {
                 options.UseNpgsql(dbString);
-                options.EnableSensitiveDataLogging();
-                
+                // Logs parameter values (user data) in SQL: development only.
+                if (Environment.IsDevelopment())
+                {
+                    options.EnableSensitiveDataLogging();
+                }
             });
           
-            /*Adding swagger generation with default settings*/
-            services.AddSwaggerGen();
+            // Swagger is a development tool only (the frontend does not use it).
+            if (Environment.IsDevelopment())
+            {
+                services.AddSwaggerGen();
+            }
 
             // requires using Microsoft.AspNetCore.Mvc;
          
@@ -103,9 +111,14 @@ namespace DocumentAnnotation
             }
             //Assign Admin role to the admins specified in the config
 
-            foreach (var email in adminEmails)
+            foreach (var email in adminEmails ?? new List<string>())
             {
                 var user = await userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    // the admin hasn't registered yet; they are promoted on the next start
+                    continue;
+                }
                 var alreadyInRole = await userManager.IsInRoleAsync(user, "Admin");
                 if (!alreadyInRole)
                     await userManager.AddToRoleAsync(user, "Admin");
@@ -139,9 +152,12 @@ namespace DocumentAnnotation
           
 
             CreateUserRoles(services, config.Value.AdminEmails).Wait();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json",
-                "WebApp1 v1"));
+            if (env.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json",
+                    "WebApp1 v1"));
+            }
          
             app.UseCors(builder =>
             {
